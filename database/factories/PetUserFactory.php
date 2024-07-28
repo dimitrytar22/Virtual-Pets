@@ -2,13 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\Pet;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PetUser>
  */
-class UserFactory extends Factory
+class PetUserFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +19,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            
+            'user_id' => User::all()->random()->id,
+            'pet_id' => Pet::all()->unique()->random()->id,
         ];
     }
-
 }

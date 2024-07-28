@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PetRarity>
  */
-class UserFactory extends Factory
+class PetRarityFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +17,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            
+            'title' => $this->faker->word(rand(8,15)),
+            'rarity_index' => $this->faker->numberBetween(1,256)
         ];
     }
-
 }
