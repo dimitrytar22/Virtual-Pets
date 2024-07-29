@@ -17,4 +17,7 @@ class Pet extends Model
     public function image() : BelongsTo{
         return $this->belongsTo(PetImage::class);
     }
+    public function hunger() : BelongsTo{
+        return $this->belongsTo(PetHunger::class);
+    }
 }

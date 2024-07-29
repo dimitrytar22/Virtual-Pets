@@ -22,7 +22,7 @@ class MainHook extends WebhookHandler{
     
     public function start(){
         $chatId = $this->message->chat()->id();
-        $user = User::firstOrCreate([
+        User::firstOrCreate([
             'chat_id' => $chatId
         ],[
             'chat_id' => $chatId, 
@@ -30,9 +30,10 @@ class MainHook extends WebhookHandler{
         ]);
        $this->chat->message("Привет!" . "\nТвой *ID:* " . "`" .$chatId . "`" . "\n\n Меню")->keyboard(
             Keyboard::make()->buttons([
-                Button::make('Мои питомцы')->action('myPets'),
-                Button::make('Магазин')->action('shop'),
-                Button::make('Колесо фортуны')->action('fortuneWheel')
+                Button::make('🐾 Мои питомцы')->action('myPets'),
+                Button::make('🆓 Получить бесплатных питомцев')->action('freePets'),
+                Button::make('🏪 Магазин')->action('shop'),
+                Button::make('🎰 Колесо фортуны')->action('fortuneWheel')
                 ])
         )->send();
     }
@@ -63,12 +64,18 @@ class MainHook extends WebhookHandler{
 
         $pet = Pet::find($this->data->get('id'));
         $buttonsArray = [];
-        $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
-        $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
+        $buttonsArray[] = Button::make('🍽️ Кормить')->action('feed')->param('id',$this->data->get('id'));
+        $buttonsArray[] = Button::make('🎯 Тренировать')->action('train')->param('id',$this->data->get('id'));
 
         
 
-        $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
+        $this->chat->message("
+🐾 Питомец № $pet->id \n
+📝 Имя: * {$pet->name->title} * \n
+📚 Опыт: * {$pet->experience} *\n
+😋 Голод: * {$pet->hunger->title} ({$pet->hunger->hunger_index}/10🍕)*\n"
+        
+        )->photo( $pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
         )->send();
 
@@ -82,16 +89,18 @@ class MainHook extends WebhookHandler{
             $pet->experience += 10;
             $pet->save();
             // $this->chat->message("123")->edit($this->messageId)->send();
-            $buttonsArray = [];
-            $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
-            $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
+            // $buttonsArray = [];
+            // $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
+            // $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
         
-            $this->reply("Вы покормили " . $pet->name->title);
-            $this->chat->deleteMessage($this->messageId)->send();
+            // $this->reply("Вы покормили " . $pet->name->title);
+            // $this->chat->deleteMessage($this->messageId)->send();
 
-            $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
-                Keyboard::make()->buttons($buttonsArray)
-            )->send();
+            // $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
+            //     Keyboard::make()->buttons($buttonsArray)
+            // )->send();
+            $this->pet();
+            $this->reply('');
 
 
         } catch (\Throwable $th) {
@@ -103,7 +112,27 @@ class MainHook extends WebhookHandler{
        
         $this->reply('');
     }
+    public function freePets(){
+        $userId = $this->callbackQuery->from()->id();
+        $freePetsAmount = 10;
 
+        $user = User::query()->where('chat_id', $userId)->first();
+        $createdPets = Pet::factory($freePetsAmount)->create();
+
+        try {
+            foreach($createdPets as $pet){
+                PetUser::create([
+                    'user_id' => $user->id,
+                    'pet_id' => $pet->id
+                ]);
+            }
+            $this->reply('Питомцы успешно добавлены!');
+        } catch (\Throwable $th) {
+            $this->reply('Не удалось получить бесплатных питомцев!');
+        }
+
+        
+    }
 
     protected function handleUnknownCommand(Stringable $text): void{
         $this->reply("Неизвестная комманда!");

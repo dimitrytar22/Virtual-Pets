@@ -10,6 +10,10 @@ class PetUser extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'pet_id',
+        'user_id'
+    ];
 
     public function pet() : BelongsTo{
         return $this->belongsTo(Pet::class);

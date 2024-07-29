@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\PetHunger;
 use App\Models\PetImage;
 use App\Models\PetName;
 use App\Models\PetRarity;
@@ -24,7 +25,8 @@ class PetFactory extends Factory
             'image_id' => PetImage::all()->random()->id,
             'name_id' => PetName::all()->random()->id,
             'experience' => $this->faker->numberBetween(0,10000),
-            'strength' => $this->faker->numberBetween(1,1000)
+            'strength' => $this->faker->numberBetween(1,1000),
+            'hunger_id' => PetHunger::all()->random()->id,
         ];
     }
 }

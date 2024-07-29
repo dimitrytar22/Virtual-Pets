@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Pet;
+use App\Models\PetHunger;
 use App\Models\PetImage;
 use App\Models\PetName;
 use App\Models\PetRarity;
@@ -18,9 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // PetImage::factory(20)->create();
-        // PetName::factory(20)->create();
-        // PetRarity::factory(7)->create();
+        PetImage::factory(20)->create();
+        PetName::factory(20)->create();
+        PetRarity::factory(7)->create();
+        PetHunger::factory(10)->create();
         Pet::factory(100)->create();
         PetUser::factory(100)->create();
     }

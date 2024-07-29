@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('experience')->default(0)->after('name');
+        Schema::table('pets', function (Blueprint $table) {
+            $table->unsignedBigInteger('hunger_id')->after('name_id');
+
+            $table->foreign('hunger_id')->references('id')->on('pet_hungers');
         });
     }
 
@@ -21,10 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if(Schema::hasColumn('users','experience'))
-                $table->dropColumn('experience');
+        Schema::table('pets', function (Blueprint $table) {
+            if(Schema::hasColumn('pets','hunger_id'))
+                $table->dropColumn('hunger_id');
         });
     }
 };
-
