@@ -16,6 +16,7 @@ use DefStudio\Telegraph\Keyboard\Keyboard;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 use App\Models\User;
+use DefStudio\Telegraph\Models\TelegraphChat;
 
 class MainHook extends WebhookHandler{
     
@@ -27,8 +28,7 @@ class MainHook extends WebhookHandler{
             'chat_id' => $chatId, 
             'name' => $this->message->chat()->title()
         ]);
-        $this->reply("Привет!" . "\nТвой *ID:* " . '`' .$chatId . '`');
-       $this->chat->message('Меню')->keyboard(
+       $this->chat->message("Привет!" . "\nТвой *ID:* " . "`" .$chatId . "`" . "\n\n Меню")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('Мои питомцы')->action('myPets'),
                 Button::make('Магазин')->action('shop'),
@@ -41,7 +41,8 @@ class MainHook extends WebhookHandler{
 
     
     public function myPets(){
-        
+        $this->chat->deleteMessage($this->messageId)->send();
+
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
         $userPets = PetUser::query()->where('user_id', $user->id)->get();
@@ -51,7 +52,6 @@ class MainHook extends WebhookHandler{
             $buttonsArray[] = Button::make('Питомец №'. $userPet->pet->id . ' - ' . $userPet->pet->name->title)->action('pet')->param('id', $userPet->pet->id);
         }
 
-       $this->chat->message('Твои питомцы' . $chatId)->send();
        $this->chat->message('Твои питомцы')->photo( 'images/myPets.jpg')->keyboard(
             Keyboard::make()->buttons($buttonsArray)
         )->send();
@@ -59,19 +59,51 @@ class MainHook extends WebhookHandler{
     }
 
     public function pet(){
+        $this->chat->deleteMessage($this->messageId)->send();
+
         $pet = Pet::find($this->data->get('id'));
         $buttonsArray = [];
         $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
         $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
-        
 
+        
 
         $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
         )->send();
 
+                
         $this->reply("");  
     }
+
+    public function feed(){
+        $pet = Pet::find($this->data->get('id'));
+        try {
+            $pet->experience += 10;
+            $pet->save();
+            // $this->chat->message("123")->edit($this->messageId)->send();
+            $buttonsArray = [];
+            $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
+            $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
+        
+            $this->reply("Вы покормили " . $pet->name->title);
+            $this->chat->deleteMessage($this->messageId)->send();
+
+            $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
+                Keyboard::make()->buttons($buttonsArray)
+            )->send();
+
+
+        } catch (\Throwable $th) {
+            $this->reply('Ошибка!');
+        }
+    }
+
+    public function train(){
+       
+        $this->reply('');
+    }
+
 
     protected function handleUnknownCommand(Stringable $text): void{
         $this->reply("Неизвестная комманда!");
