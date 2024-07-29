@@ -17,8 +17,8 @@ class PetHungerFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->word(10),
-            'hunger_index' => $this->faker->unique()->numberBetween(1,10) // 1/10 - не сытый  10/10 сытый
+            // 'title' => $this->faker->word(10),
+            // 'hunger_index' => $this->faker->unique()->numberBetween(1,10) // 1/10 - не сытый  10/10 сытый
         ];
     }
 }
