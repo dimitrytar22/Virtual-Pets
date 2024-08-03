@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\PetController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +16,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', [MainController::class, 'index'])->name('main.index');
+
+Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::group(['prefix' => 'pets', 'as' => 'pets.'], function(){
+        Route::get('/', [PetController::class, 'index'])->name('index');
+    });
+        
+    Route::get('/', [AdminController::class, 'index'])->name('index');
 });

@@ -1,7 +1,9 @@
 <?php
 
+use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,9 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pets', function (Blueprint $table) {
-            $table->unsignedBigInteger('hunger_id')->after('name_id');
+            DB::statement('ALTER TABLE pets ADD CONSTRAINT chk_hunger_index CHECK (hunger_index >= 0 AND hunger_index <= 10)');
 
-            $table->foreign('hunger_id')->references('id')->on('pet_hungers');
         });
     }
 
@@ -24,8 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pets', function (Blueprint $table) {
-            if(Schema::hasColumn('pets','hunger_id'))
-                $table->dropColumn('hunger_id');
+            Schema::hasColumn('hunger_index') == true ? $table->dropColumn('hunger_index') : $table;
+            
         });
     }
 };

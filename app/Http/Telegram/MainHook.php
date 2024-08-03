@@ -28,7 +28,20 @@ class MainHook extends WebhookHandler{
             'chat_id' => $chatId, 
             'name' => $this->message->chat()->title()
         ]);
-       $this->chat->message("Привет!" . "\nТвой *ID:* " . "`" .$chatId . "`" . "\n\n Меню")->keyboard(
+       $this->menu();
+    }
+
+
+    public function menu(){
+        $this->chat->deleteMessage($this->messageId)->send();
+
+
+        if($this->message == NULL)
+            $chatId = $this->callbackQuery->from()->id();
+       else
+            $chatId = $this->message->chat()->id();
+
+        $this->chat->message("👋 Привет!" . "\nТвой *ID:* " . "`" .$chatId . "`" . "\n\n📋 Меню")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('🐾 Мои питомцы')->action('myPets'),
                 Button::make('🆓 Получить бесплатных питомцев')->action('freePets'),
@@ -37,26 +50,26 @@ class MainHook extends WebhookHandler{
                 ])
         )->send();
     }
-
-
-
     
     public function myPets(){
         $this->chat->deleteMessage($this->messageId)->send();
 
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
-        $userPets = PetUser::query()->where('user_id', $user->id)->get();
+        $userPets = PetUser::query()->where('user_id', $user->id)->paginate(99);
+        
         
         $buttonsArray = [];
         foreach( $userPets as $userPet){
-            $buttonsArray[] = Button::make('Питомец №'. $userPet->pet->id . ' - ' . $userPet->pet->name->title)->action('pet')->param('id', $userPet->pet->id);
+            $buttonsArray[] = Button::make('Питомец'.  ' - ' . $userPet->pet->name->title)->action('pet')->param('id', $userPet->pet->id);
         }
+        $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
 
        $this->chat->message('Твои питомцы')->photo( 'images/myPets.jpg')->keyboard(
-            Keyboard::make()->buttons($buttonsArray)
+            Keyboard::make()->buttons($buttonsArray)->chunk(2)
         )->send();
         $this->reply('');
+        
     }
 
     public function pet(){
@@ -65,15 +78,16 @@ class MainHook extends WebhookHandler{
         $pet = Pet::find($this->data->get('id'));
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🍽️ Кормить')->action('feed')->param('id',$this->data->get('id'));
-        $buttonsArray[] = Button::make('🎯 Тренировать')->action('train')->param('id',$this->data->get('id'));
+        $buttonsArray[] = Button::make('🎯💪 Тренировать')->action('train')->param('id',$this->data->get('id'));
+        $buttonsArray[] = Button::make('🔙 Назад к питомцам')->action('myPets');
 
         
-
-        $this->chat->message("
+$this->chat->message("
 🐾 Питомец № $pet->id \n
 📝 Имя: * {$pet->name->title} * \n
 📚 Опыт: * {$pet->experience} *\n
-😋 Голод: * {$pet->hunger->title} ({$pet->hunger->hunger_index}/10🍕)*\n"
+💪 Сила : *{$pet->strength}*\n
+😋 Голод: * {$pet->hunger_index}/10🍕*\n"
         
         )->photo( $pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
@@ -86,19 +100,22 @@ class MainHook extends WebhookHandler{
     public function feed(){
         $pet = Pet::find($this->data->get('id'));
         try {
-            $pet->experience += 10;
-            $pet->save();
-            // $this->chat->message("123")->edit($this->messageId)->send();
-            // $buttonsArray = [];
-            // $buttonsArray[] = Button::make('Кормить')->action('feed')->param('id',$this->data->get('id'));
-            // $buttonsArray[] = Button::make('Тренировать')->action('train')->param('id',$this->data->get('id'));
-        
-            // $this->reply("Вы покормили " . $pet->name->title);
-            // $this->chat->deleteMessage($this->messageId)->send();
+            $expPointsForFood = 10;
 
-            // $this->chat->message("Питомец № $pet->id \nИмя:* " . $pet->name->title . " * \nОпыт: * $pet->experience *\n")->photo( $pet->image->title)->keyboard(
-            //     Keyboard::make()->buttons($buttonsArray)
-            // )->send();
+            if($pet->hunger_index >= 10){
+                $this->reply("Питомец сыт!");
+                return;
+            }else if($pet->hunger_index == 9){
+                $pet->experience += $expPointsForFood;
+                $pet->hunger_index += 1;
+            }else{
+                $pet->experience += $expPointsForFood;
+                $pet->hunger_index += 2;
+            }
+
+            $pet->save();
+            $pet->save();
+            $this->reply("Вы покормили " . $pet->name->title . " (+{$expPointsForFood} очков опыта)");
             $this->pet();
             $this->reply('');
 

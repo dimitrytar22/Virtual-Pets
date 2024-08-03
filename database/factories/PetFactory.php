@@ -26,7 +26,7 @@ class PetFactory extends Factory
             'name_id' => PetName::all()->random()->id,
             'experience' => $this->faker->numberBetween(0,10000),
             'strength' => $this->faker->numberBetween(1,1000),
-            'hunger_id' => PetHunger::all()->random()->id,
+            'hunger_index' => $this->faker->numberBetween(0,10),
         ];
     }
 }
