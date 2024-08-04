@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //INSERT INTO `telegraph_bots` (`id`, `token`, `name`, `created_at`, `updated_at`) VALUES (NULL, '7337805317:AAG9HVObiIY3UoVCcasitXQexK6gEw8cJq4', 'Bot #1', '2024-08-01 22:52:53', '2024-08-01 22:52:53')
 
         Schema::create('pets', function (Blueprint $table) {
             $table->id();
