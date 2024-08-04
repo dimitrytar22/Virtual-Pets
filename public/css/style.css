@@ -198,12 +198,12 @@ table th {
 
 
 
-.new-pet {
+.new-pet,.new-user {
     margin-bottom: 20px;
     text-align: left; /* Выравнивание ссылки по правому краю */
 }
 
-.new-pet a {
+.new-pet a, .new-user a {
     display: inline-block;
     background-color: #4CAF50;
     color: #fff;

@@ -1,4 +1,10 @@
 @extends('admin.layout')
+
+
+@section('title')
+    Virtual Pets Create Pets
+@endsection
+
 @section('content')
     <main>
         <section id="pets">

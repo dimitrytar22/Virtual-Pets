@@ -1,10 +1,15 @@
 @extends('admin.layout')
+
+@section('title')
+Virtual Pets Manage Pets
+@endsection
+
 @section('content')
     <main>
        
         <section id="existing-pets">
             <h2>Virtual Pets - Existing Pets</h2>
-            <div class="new-pet"><a href="{{route('admin.pets.create')}}">Create new pet</a></div>
+            <div class="new-pet"><a href="{{route('admin.pets.create')}}">Create New Pet</a></div>
             <table>
                 <thead>
                     <tr>
