@@ -10,6 +10,7 @@ class Pet extends Model
 {
     use HasFactory;
 
+    protected $guarded =[];
 
     public function name() : BelongsTo{
         return $this->belongsTo(PetName::class);
@@ -19,5 +20,8 @@ class Pet extends Model
     }
     public function hunger() : BelongsTo{
         return $this->belongsTo(PetHunger::class);
+    }
+    public function rarity() : BelongsTo{
+        return $this->belongsTo(PetRarity::class);
     }
 }

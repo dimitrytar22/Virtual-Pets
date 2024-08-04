@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PetName extends Model
 {
+    protected $fillable = [
+        'title'
+    ];
     use HasFactory;
 }

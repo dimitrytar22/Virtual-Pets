@@ -22,6 +22,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::group(['prefix' => 'pets', 'as' => 'pets.'], function(){
         Route::get('/', [PetController::class, 'index'])->name('index');
+        Route::get('/create', [PetController::class, 'create'])->name('create');
+        Route::post('/store', [PetController::class, 'store'])->name('store');
     });
         
     Route::get('/', [AdminController::class, 'index'])->name('index');
