@@ -12,25 +12,29 @@
             <div class="new-user">
                 <a href="{{ route('admin.users.create') }}">Create New User</a>
             </div>
+
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Email</th>
+                        <th>Chat ID</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Example row -->
-                    <tr>
-                        <td>1</td>
-                        <td>John Doe</td>
-                        <td>john@example.com</td>
-                        <td>
-                            <button>Edit</button>
-                        </td>
-                    </tr>
+
+                    @foreach ($users as $user)
+                        <tr>
+                            <td>{{$user->id}}</td>
+                            <td>{{$user->name}}</td>
+                            <td>{{$user->chat_id}}</td>
+                            <td>
+                                <button>Edit</button>
+                            </td>
+                        </tr>
+                    @endforeach
                     <!-- Additional user rows -->
                 </tbody>
             </table>

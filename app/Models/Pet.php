@@ -24,4 +24,8 @@ class Pet extends Model
     public function rarity() : BelongsTo{
         return $this->belongsTo(PetRarity::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

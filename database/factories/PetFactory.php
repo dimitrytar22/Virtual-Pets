@@ -6,6 +6,7 @@ use App\Models\PetHunger;
 use App\Models\PetImage;
 use App\Models\PetName;
 use App\Models\PetRarity;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,6 +28,7 @@ class PetFactory extends Factory
             'experience' => $this->faker->numberBetween(0,10000),
             'strength' => $this->faker->numberBetween(1,1000),
             'hunger_index' => $this->faker->numberBetween(0,10),
+            'user_id' => User::all()->random()->id,
         ];
     }
 }

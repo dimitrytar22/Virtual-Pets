@@ -15,6 +15,7 @@ return new class extends Migration
 
         Schema::create('pets', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('rarity_id');
             $table->unsignedBigInteger('image_id')->default(1);
             $table->unsignedBigInteger('name_id')->default(1);
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->integer('hunger_index')->default(10); // by default full stomach
             $table->timestamps();
             
+            $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('rarity_id')->references('id')->on('pet_rarities');
             $table->foreign('name_id')->references('id')->on('pet_names');
             $table->foreign('image_id')->references('id')->on('pet_images'); 

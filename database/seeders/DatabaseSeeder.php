@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         // )->create();
         // End of making pet hunger rows
         
-        Pet::factory(100)->create();
-        PetUser::factory(100)->create();
+        //Pet::factory(100)->create();
+        //PetUser::factory(100)->create();
     }
 }

@@ -56,12 +56,12 @@ class MainHook extends WebhookHandler{
 
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
-        $userPets = PetUser::query()->where('user_id', $user->id)->paginate(99);
+        $userPets = $user->pets()->paginate(10);
         
         
         $buttonsArray = [];
         foreach( $userPets as $userPet){
-            $buttonsArray[] = Button::make('Питомец'.  ' - ' . $userPet->pet->name->title)->action('pet')->param('id', $userPet->pet->id);
+            $buttonsArray[] = Button::make('Питомец'.  ' - ' . $userPet->name->title)->action('pet')->param('id', $userPet->id);
         }
         $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
 
@@ -134,15 +134,9 @@ $this->chat->message("
         $freePetsAmount = 10;
 
         $user = User::query()->where('chat_id', $userId)->first();
-        $createdPets = Pet::factory($freePetsAmount)->create();
-
+        
         try {
-            foreach($createdPets as $pet){
-                PetUser::create([
-                    'user_id' => $user->id,
-                    'pet_id' => $pet->id
-                ]);
-            }
+            $createdPets = Pet::factory($freePetsAmount)->create();
             $this->reply('Питомцы успешно добавлены!');
         } catch (\Throwable $th) {
             $this->reply('Не удалось получить бесплатных питомцев!');

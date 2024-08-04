@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pet\StoreRequest;
 use App\Http\Services\PetService;
+use App\Models\Pet;
 use App\Models\PetName;
 use App\Models\PetRarity;
 use App\Models\User;
@@ -21,7 +22,9 @@ class PetController extends Controller
 
 
     public function index(){
-        return view('admin.pets.index');
+        return view('admin.pets.index',[
+            'pets' => Pet::paginate(50),
+                    ]);
     }
     
     public function create(){
