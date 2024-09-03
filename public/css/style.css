@@ -1,3 +1,10 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -18,7 +25,9 @@ header h1 {
     margin: 0;
     font-size: 24px; /* Размер шрифта заголовка */
 }
-
+.content button, form button{
+    margin-top: 40px;
+}
 nav {
     width: 100%; /* Растягивает навигационную панель на всю ширину */
     background-color: #4CAF50; /* Цвет фона для навигации */
@@ -118,20 +127,22 @@ nav {
 
 main {
     padding: 20px;
+    flex: 1; /* Добавлено для основного контента */
 }
 
 section {
     margin-bottom: 20px;
 }
+
 footer {
     background-color: #4CAF50;
     color: #fff;
     text-align: center;
-    padding: 10px;
-    position: fixed;
+    padding: 5px;
     width: 100%;
-    bottom: 0;
+    margin-top: auto; /* Добавлено для футера */
 }
+
 form {
     display: flex;
     flex-direction: column;
@@ -174,8 +185,12 @@ table th {
     background-color: #f2f2f2;
 }
 
-#existing-pets table {
+#existing-pets table, #existing-categories table, #categories, #existing-pet-names {
     margin-top: 20px;
+}
+.success-message {
+    color: green;
+    font-weight: bold; /* Можно добавить жирность текста для акцента */
 }
 
 .pagination {
@@ -196,14 +211,12 @@ table th {
     background-color: #45a049;
 }
 
-
-
-.new-pet,.new-user {
+.new-pet, .new-user, .new-image {
     margin-bottom: 20px;
     text-align: left; /* Выравнивание ссылки по правому краю */
 }
 
-.new-pet a, .new-user a {
+.new-pet a, .new-user a, .new-image a {
     display: inline-block;
     background-color: #4CAF50;
     color: #fff;
@@ -216,4 +229,18 @@ table th {
 
 .new-pet a:hover {
     background-color: #003d00;
+}
+
+.submenu {
+    background-color: #4CAF50; /* Светлый зелёный цвет для подменю */
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+.submenu .nav-links {
+    justify-content: center;
+}
+
+.submenu .nav-links li {
+    margin: 0 15px;
 }

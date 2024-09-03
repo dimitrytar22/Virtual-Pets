@@ -2,10 +2,12 @@
 
 
 @section('title')
-    Virtual Pets Create Pets
+    Create Pets
 @endsection
 
 @section('content')
+    <x-pets-submenu></x-pets-submenu>
+
     <main>
         <section id="pets">
             <h2>Virtual Pets - Manage Pets</h2>

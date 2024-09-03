@@ -7,6 +7,6 @@ use Illuminate\Http\Request;
 class MainController extends Controller
 {
     public function index(){
-    dd(1);
+        return redirect()->route('admin.index');
     }
 }

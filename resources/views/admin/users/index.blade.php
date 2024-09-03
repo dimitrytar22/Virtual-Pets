@@ -2,10 +2,11 @@
 
 
 @section('title')
-    Virtual Pets Manage Users
+    Manage Users
 @endsection
 
 @section('content')
+    <x-users-submenu></x-users-submenu>
     <main>
         <section id="manage-users" class="container">
             <h2>Virtual Pets - Existing Users</h2>

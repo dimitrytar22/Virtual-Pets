@@ -1,11 +1,12 @@
 @extends('admin.layout')
 
 @section('title')
-    Virtual Pets Manage Pets
+    Manage Pets
 @endsection
 
 @section('content')
-    <main>
+    <x-pets-submenu></x-pets-submenu>
+    <main>  
 
         <section id="existing-pets">
             <h2>Virtual Pets - Existing Pets</h2>
@@ -19,6 +20,7 @@
                         <th>Experience</th>
                         <th>Hunger</th>
                         <th>Owner</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,7 +32,8 @@
                             <td>{{ $pet->strength }}</td>
                             <td>{{ $pet->experience }}</td>
                             <td>{{ $pet->hunger_index }}</td>
-                            <td> {{'@'}}{{ $pet->user->name }} ({{$pet->user->chat_id}})</td>
+                            <td> {{ '@' }}{{ $pet->user->name }} ({{ $pet->user->chat_id }})</td>
+                            <td> <a href="{{ route('admin.pets.edit', $pet->id) }}">Edit</a> </td>
                         </tr>
                     @endforeach
                 </tbody>

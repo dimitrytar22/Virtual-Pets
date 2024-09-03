@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PetImage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('rarity_id');
-            $table->unsignedBigInteger('image_id')->default(1);
+            $table->unsignedBigInteger('image_id')->default(PetImage::all()->first()->id);
             $table->unsignedBigInteger('name_id')->default(1);
             $table->integer('experience')->default(0);
             $table->integer('strength')->default(1);

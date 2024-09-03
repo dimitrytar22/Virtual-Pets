@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Pet\StoreRequest;
+use App\Http\Requests\Admin\Pet\StoreRequest;
+use App\Http\Requests\Admin\Pet\UpdateRequest;
+
 use App\Http\Services\PetService;
 use App\Models\Pet;
 use App\Models\PetName;
@@ -33,6 +35,16 @@ class PetController extends Controller
     }
 
     public function store(StoreRequest $request){
-        $this->service->update($request);
+        $this->service->store($request);
+        dd($request->validated());
     }   
+
+    public function edit(Pet $pet){
+        return view('admin.pets.edit', ['pet' => $pet,'users' => User::all(), 'pet_rarities' => PetRarity::all(), 'pet_names' => PetName::all()]);
+    }
+
+    public function update(UpdateRequest $updateRequest, Pet $pet ){
+        $this->service->update($updateRequest,$pet);
+        return redirect()->route('admin.pets.index');
+    }
 }
