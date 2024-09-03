@@ -72,11 +72,16 @@ class MainHook extends WebhookHandler
 
     }
 
-    public function pet()
+    public function pet($id = NULL)
     {
+
         $this->chat->deleteMessage($this->messageId)->send();
 
-        $pet = Pet::find($this->data->get('id'));
+        if($id != NULL){
+            $pet = Pet::find($id);
+        }else{
+            $pet = Pet::find($this->data->get('id'));
+        }
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🍽️ Кормить')->action('feed')->param('id', $this->data->get('id'));
         $buttonsArray[] = Button::make('🎯💪 Тренировать')->action('train')->param('id', $this->data->get('id'));
@@ -116,18 +121,30 @@ class MainHook extends WebhookHandler
             $pet->save();
             $pet->save();
             $this->reply("Вы покормили " . $pet->name->title . " (+{$expPointsForFood} очков опыта)");
-            $this->pet();
-            $this->reply('');
+            
+            $this->pet($pet->id);
 
         } catch (\Throwable $th) {
             $this->reply('Ошибка!');
         }
     }
 
-    public function train()
+    public function train($id = NULL)
     {
+        $this->chat->deleteMessage($this->messageId)->send();
 
-        $this->reply('');
+        $strengthPointsForTrain = 34;
+
+        if($id != NULL){
+            $pet = Pet::find($id);
+        }else{
+            $pet = Pet::find($this->data->get('id'));
+        }        
+
+        $pet->strength +=$strengthPointsForTrain;
+        $pet->save();
+        $this->reply("Вы потренировали питомца (+ {$strengthPointsForTrain} силы)");
+        $this->pet($pet->id);
     }
     public function freePets()
     {
