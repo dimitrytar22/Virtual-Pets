@@ -36,7 +36,7 @@ class PetController extends Controller
 
     public function store(StoreRequest $request){
         $this->service->store($request);
-        dd($request->validated());
+       
     }   
 
     public function edit(Pet $pet){
@@ -44,7 +44,6 @@ class PetController extends Controller
     }
 
     public function update(UpdateRequest $updateRequest, Pet $pet ){
-        $this->service->update($updateRequest,$pet);
-        return redirect()->route('admin.pets.index');
+        return redirect()->route( $this->service->update($updateRequest,$pet));
     }
 }

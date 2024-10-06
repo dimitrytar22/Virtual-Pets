@@ -44,7 +44,11 @@
                     </option>
                 @endforeach
             </select>
-
+            @php
+                $url = url()->previous();
+                $route = app('router')->getRoutes($url)->match(app('request')->create($url))->getName();
+            @endphp
+            <input type="hidden" name="previous_page" value="{{$route}}">
             <button type="submit">Save Pet</button>
         </form>
     </div>

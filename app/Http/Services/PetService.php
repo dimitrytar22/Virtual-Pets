@@ -30,7 +30,7 @@ class PetService{
             'strength' => $data['strength'],
             'user_id' => $user->id
         ]);
-        dd($pet);
+      
     }
 
     public function update(UpdateRequest $updateRequest, Pet $pet){
@@ -49,7 +49,7 @@ class PetService{
             'strength' => $data['strength'],
             'user_id' => $data['user_id']
         ]);
-       
+       return $data['previous_page'];
     }
 }
 

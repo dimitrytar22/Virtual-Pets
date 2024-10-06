@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
             'strength' => 'required',
             'experience' => 'required',
             'hunger_index' => '',
-
+            'previous_page' => '',
         ];
     }
 }
