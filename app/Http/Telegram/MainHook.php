@@ -133,8 +133,8 @@ class MainHook extends WebhookHandler
     {
         $this->chat->deleteMessage($this->messageId)->send();
 
-        $strengthPointsForTrain = 34;
-
+        $strengthPointsForTrain = rand(1,15);
+        $expPointsForTrain = rand(1,10);
         if($id != NULL){
             $pet = Pet::find($id);
         }else{
@@ -142,6 +142,7 @@ class MainHook extends WebhookHandler
         }        
 
         $pet->strength +=$strengthPointsForTrain;
+        $pet->experience += $expPointsForTrain;
         $pet->save();
         $this->reply("Вы потренировали питомца (+ {$strengthPointsForTrain} силы)");
         $this->pet($pet->id);

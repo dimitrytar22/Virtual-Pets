@@ -49,7 +49,7 @@
 
             @yield('content')
             <footer>
-                <p>&copy; 2024 Virtual Pets</p>
+                <p>&copy; {{date('Y')}} Virtual Pets</p>
             </footer>
         </div>
     <script src="{{asset('js/script.js')}}"></script>

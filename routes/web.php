@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\PetCategoryController;
 use App\Http\Controllers\Admin\PetController;
 use App\Http\Controllers\Admin\PetImageController;
+use App\Http\Controllers\Admin\PetRarityController;
 use App\Http\Controllers\Admin\User\PetController as UserPetController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdminController;
@@ -40,6 +41,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
             Route::put('/{image}', [PetImageController::class, 'update'])->name('update');
 
         });
+
+
+        Route::group(['prefix' => 'rarities', 'as' => 'rarities.'], function(){
+            Route::get('/', [PetRarityController::class, 'index'])->name('index');
+            });
 
         Route::group(['prefix' => 'names', 'as' => 'names.'], function(){
             Route::get('/', [PetNameController::class, 'index'])->name('index');
