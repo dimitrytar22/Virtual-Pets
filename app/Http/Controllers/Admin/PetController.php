@@ -36,7 +36,7 @@ class PetController extends Controller
 
     public function store(StoreRequest $request){
         $this->service->store($request);
-       
+        return redirect()->route('admin.pets.create');
     }   
 
     public function edit(Pet $pet){

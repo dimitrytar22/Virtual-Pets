@@ -12,20 +12,14 @@
         <form class="form" method="POST" action="{{ route('admin.pets.images.store') }}" enctype="multipart/form-data">
             @csrf
             @method('POST')
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" required>
+        
 
             <label for="image">Image:</label>
             <input type="file" id="image" name="image" accept=".jpg,.jpeg, .png, .bmp, .gif, .svg, .webp" required>
             <img id="imagePreview" src="#" width="300px" alt="Image Preview"
                 style="display:none; margin-top: 10px; max-width: 100%; height: auto;">
 
-            <label for="category">Category:</label>
-            <select id="category" name="category_id" required>
-                @foreach ($pet_categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->title }}</option>
-                @endforeach
-            </select>
+            
 
             <button type="submit">Save Pet Image</button>
         </form>

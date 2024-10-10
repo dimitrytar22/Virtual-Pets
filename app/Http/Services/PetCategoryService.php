@@ -10,11 +10,16 @@ class PetCategoryService
     public function store(StoreRequest $request)
     {
         $data = $request->validated();
-        $title = $data['title'];
+        $title_array = $data['title'];
+        $title_array = str_replace(' ','', $title_array);
+        $title_array =  preg_split('/[;:]/', $title_array);
+        foreach($title_array as $title){
+            PetCategory::create([
+                'title' => $title
+            ]);
+            
+        }
 
-        PetCategory::create([
-            'title' => $title
-        ]);
 
     }
 

@@ -53,23 +53,23 @@ class MainHook extends WebhookHandler
     public function myPets()
     {
         $this->chat->deleteMessage($this->messageId)->send();
-
+        
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
         $userPets = $user->pets()->paginate(100);
-
+        
         $buttonsArray = [];
         foreach ($userPets as $userPet) {
             $buttonsArray[] = Button::make('Питомец' . ' - ' . $userPet->name->title)->action('pet')->param('id', $userPet->id);
         }
         Log::info($buttonsArray);
         $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
-
+        
         $this->chat->message('Твои питомцы')->photo('images/myPets.jpg')->keyboard(
             Keyboard::make()->buttons($buttonsArray)->chunk(2)
-        )->send();
-        $this->reply('');
-
+            )->send();
+            
+            $this->reply('');
     }
 
     public function pet($id = NULL)
@@ -86,7 +86,6 @@ class MainHook extends WebhookHandler
         $buttonsArray[] = Button::make('🍽️ Кормить')->action('feed')->param('id', $this->data->get('id'));
         $buttonsArray[] = Button::make('🎯💪 Тренировать')->action('train')->param('id', $this->data->get('id'));
         $buttonsArray[] = Button::make('🔙 Назад к питомцам')->action('myPets');
-
         $this->chat->message("
 🐾 Питомец № $pet->id \n
 📝 Имя: * {$pet->name->title} * \n
@@ -94,7 +93,7 @@ class MainHook extends WebhookHandler
 💪 Сила : *{$pet->strength}*\n
 😋 Голод: * {$pet->hunger_index}/10🍕*\n"
 
-        )->photo($pet->image->title)->keyboard(
+        )->photo("images/".$pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
         )->send();
 
@@ -155,47 +154,73 @@ class MainHook extends WebhookHandler
         $user = User::query()->where('chat_id', $userId)->first();
 
         try {
-            $createdPets = Pet::factory()->count(5)->sequence([
-                'rarity_id' => PetRarity::all()->random()->id,
-                    'image_id' => PetImage::all()->random()->id,
-                    'name_id' => PetName::all()->random()->id,
-                    'experience' => fake()->numberBetween(0, 10000),
-                    'strength' => fake()->numberBetween(1, 1000),
-                    'hunger_index' => fake()->numberBetween(0, 10),
+            
+            $user_id = $user->id;
+
+
+           for($i = 0; $i < 5; $i++){
+                $rarity_id = PetRarity::all()->random()->id;
+                $name_id = PetName::all()->random();
+                $image_id = PetImage::where('category_id', $name_id->category->id)->get()->random()->id;
+                
+                $name_id = $name_id->id;
+
+                $experience = fake()->numberBetween(0, 10000);
+                $strength = fake()->numberBetween(1, 1000);
+                $hunger_index = fake()->numberBetween(0, 10);
+
+                Pet::create([
+                    'rarity_id' => $rarity_id,
+                    'image_id' => $image_id,
+                    'name_id' => $name_id,
+                    'experience' => $experience,
+                    'strength' => $strength,
+                    'hunger_index' => $hunger_index,
                     'user_id' => $user->id
-            ],[
-                'rarity_id' => PetRarity::all()->random()->id,
-                    'image_id' => PetImage::all()->random()->id,
-                    'name_id' => PetName::all()->random()->id,
-                    'experience' => fake()->numberBetween(0, 10000),
-                    'strength' => fake()->numberBetween(1, 1000),
-                    'hunger_index' => fake()->numberBetween(0, 10),
-                    'user_id' => $user->id
-            ],[
-                'rarity_id' => PetRarity::all()->random()->id,
-                    'image_id' => PetImage::all()->random()->id,
-                    'name_id' => PetName::all()->random()->id,
-                    'experience' => fake()->numberBetween(0, 10000),
-                    'strength' => fake()->numberBetween(1, 1000),
-                    'hunger_index' => fake()->numberBetween(0, 10),
-                    'user_id' => $user->id
-            ],[
-                'rarity_id' => PetRarity::all()->random()->id,
-                    'image_id' => PetImage::all()->random()->id,
-                    'name_id' => PetName::all()->random()->id,
-                    'experience' => fake()->numberBetween(0, 10000),
-                    'strength' => fake()->numberBetween(1, 1000),
-                    'hunger_index' => fake()->numberBetween(0, 10),
-                    'user_id' => $user->id
-            ],[
-                'rarity_id' => PetRarity::all()->random()->id,
-                    'image_id' => PetImage::all()->random()->id,
-                    'name_id' => PetName::all()->random()->id,
-                    'experience' => fake()->numberBetween(0, 10000),
-                    'strength' => fake()->numberBetween(1, 1000),
-                    'hunger_index' => fake()->numberBetween(0, 10),
-                    'user_id' => $user->id
-            ])->create();
+                ]);
+           }
+
+            // $createdPets = Pet::factory()->count(5)->sequence([
+            //     'rarity_id' => PetRarity::all()->random()->id,
+            //         'image_id' => PetImage::all()->random()->id,
+            //         'name_id' => PetName::all()->random()->id,
+            //         'experience' => fake()->numberBetween(0, 10000),
+            //         'strength' => fake()->numberBetween(1, 1000),
+            //         'hunger_index' => fake()->numberBetween(0, 10),
+            //         'user_id' => $user->id
+            // ],[
+            //     'rarity_id' => PetRarity::all()->random()->id,
+            //         'image_id' => PetImage::all()->random()->id,
+            //         'name_id' => PetName::all()->random()->id,
+            //         'experience' => fake()->numberBetween(0, 10000),
+            //         'strength' => fake()->numberBetween(1, 1000),
+            //         'hunger_index' => fake()->numberBetween(0, 10),
+            //         'user_id' => $user->id
+            // ],[
+            //     'rarity_id' => PetRarity::all()->random()->id,
+            //         'image_id' => PetImage::all()->random()->id,
+            //         'name_id' => PetName::all()->random()->id,
+            //         'experience' => fake()->numberBetween(0, 10000),
+            //         'strength' => fake()->numberBetween(1, 1000),
+            //         'hunger_index' => fake()->numberBetween(0, 10),
+            //         'user_id' => $user->id
+            // ],[
+            //     'rarity_id' => PetRarity::all()->random()->id,
+            //         'image_id' => PetImage::all()->random()->id,
+            //         'name_id' => PetName::all()->random()->id,
+            //         'experience' => fake()->numberBetween(0, 10000),
+            //         'strength' => fake()->numberBetween(1, 1000),
+            //         'hunger_index' => fake()->numberBetween(0, 10),
+            //         'user_id' => $user->id
+            // ],[
+            //     'rarity_id' => PetRarity::all()->random()->id,
+            //         'image_id' => PetImage::all()->random()->id,
+            //         'name_id' => PetName::all()->random()->id,
+            //         'experience' => fake()->numberBetween(0, 10000),
+            //         'strength' => fake()->numberBetween(1, 1000),
+            //         'hunger_index' => fake()->numberBetween(0, 10),
+            //         'user_id' => $user->id
+            // ])->create();
             $this->reply('Питомцы успешно добавлены!');
         } catch (\Throwable $th) {
             Log::info($th);

@@ -9,6 +9,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PetNameController;
+use App\Models\Pet;
+use App\Models\PetCategory;
+use App\Models\PetImage;
+use App\Models\PetName;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,7 +25,34 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/import', function(){
+    $dir = "images_to_import";
+    $files =  scandir($dir);
+    $files = array_diff($files, array('.', '..'));
+    // dd($files);
+    foreach ($files as $file) {
+        usleep(1000);
+        $category_title = strtok($file,'_');
+        $category_id = PetCategory::query()->where('title', $category_title)->first()->id;
+        var_dump($category_id);
+        $file_path = $dir.'/'.$file;
+        $destination_path = "images/";
 
+        PetImage::create([
+            'title' => $file,
+            'category_id' => $category_id
+        ]);
+
+        if (copy($file_path, $destination_path . basename($file_path))) {
+            echo "Файл успешно скопирован.";
+        } else {
+            echo "Ошибка при копировании файла.";
+        }
+
+        echo $file . "<br>";
+    }
+    return 1;
+});
 Route::get('/', [MainController::class, 'index'])->name('main.index');
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){

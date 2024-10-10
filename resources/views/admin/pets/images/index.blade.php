@@ -29,7 +29,7 @@
                             <td>{{ $image->title }}</td>
                             <td>{{ $image->category->title }}</td>
                             <td>
-                                <img src="{{ asset($image->title) }}" alt="{{ $image->title }}" style="width: 100px;">
+                                <img src="{{ asset("images/".$image->title) }}" alt="{{ $image->title }}" style="width: 100px;">
                             </td>
                             <td>
                                 <a href="{{route('admin.pets.images.edit', ['image' => $image->id])}}">Edit</a>
