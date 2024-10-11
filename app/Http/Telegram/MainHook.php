@@ -12,12 +12,12 @@ use DefStudio\Telegraph\DTO\Message;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Stringable;
 
 class MainHook extends WebhookHandler
 {
-
     public function start()
     {
         $chatId = $this->message->chat()->id();
@@ -32,27 +32,26 @@ class MainHook extends WebhookHandler
 
     public function menu()
     {
-        $this->chat->deleteMessage($this->messageId)->send();
-
+        
         if ($this->message == null) {
             $chatId = $this->callbackQuery->from()->id();
         } else {
             $chatId = $this->message->chat()->id();
         }
-
+        
         $this->chat->message("👋 Привет!" . "\nТвой *ID:* " . "`" . $chatId . "`" . "\n\n📋 Меню")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('🐾 Мои питомцы')->action('myPets'),
                 Button::make('🆓 Получить бесплатных питомцев')->action('freePets'),
                 Button::make('🏪 Магазин')->action('shop'),
                 Button::make('🎰 Колесо фортуны')->action('fortuneWheel'),
-            ])
-        )->send();
+                ])
+                )->send();
+        $this->chat->deleteMessage($this->messageId)->send();
     }
 
     public function myPets()
     {
-        $this->chat->deleteMessage($this->messageId)->send();
         
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
@@ -69,14 +68,12 @@ class MainHook extends WebhookHandler
             Keyboard::make()->buttons($buttonsArray)->chunk(2)
             )->send();
             
-            $this->reply('');
+        $this->chat->deleteMessage($this->messageId)->send();
+        $this->reply('');
     }
 
     public function pet($id = NULL)
     {
-
-        $this->chat->deleteMessage($this->messageId)->send();
-
         if($id != NULL){
             $pet = Pet::find($id);
         }else{
@@ -87,16 +84,17 @@ class MainHook extends WebhookHandler
         $buttonsArray[] = Button::make('🎯💪 Тренировать')->action('train')->param('id', $this->data->get('id'));
         $buttonsArray[] = Button::make('🔙 Назад к питомцам')->action('myPets');
         $this->chat->message("
-🐾 Питомец № $pet->id \n
-📝 Имя: * {$pet->name->title} * \n
-📚 Опыт: * {$pet->experience} *\n
-💪 Сила : *{$pet->strength}*\n
-😋 Голод: * {$pet->hunger_index}/10🍕*\n"
+Питомец № $pet->id  🐾 \n
+Ценность: * {$pet->rarity->title} * \n
+Имя: * {$pet->name->title} * \n
+Опыт: * {$pet->experience} *\n
+Сила : *{$pet->strength}*\n
+Голод: * {$pet->hunger_index}/10*\n"
 
         )->photo("images/".$pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
         )->send();
-
+        $this->chat->deleteMessage($this->messageId)->send();
         $this->reply("");
     }
 
@@ -130,7 +128,6 @@ class MainHook extends WebhookHandler
 
     public function train($id = NULL)
     {
-        $this->chat->deleteMessage($this->messageId)->send();
 
         $strengthPointsForTrain = rand(1,15);
         $expPointsForTrain = rand(1,10);
@@ -145,6 +142,7 @@ class MainHook extends WebhookHandler
         $pet->save();
         $this->reply("Вы потренировали питомца (+ {$strengthPointsForTrain} силы)");
         $this->pet($pet->id);
+        $this->chat->deleteMessage($this->messageId)->send();   
     }
     public function freePets()
     {
@@ -180,55 +178,14 @@ class MainHook extends WebhookHandler
                 ]);
            }
 
-            // $createdPets = Pet::factory()->count(5)->sequence([
-            //     'rarity_id' => PetRarity::all()->random()->id,
-            //         'image_id' => PetImage::all()->random()->id,
-            //         'name_id' => PetName::all()->random()->id,
-            //         'experience' => fake()->numberBetween(0, 10000),
-            //         'strength' => fake()->numberBetween(1, 1000),
-            //         'hunger_index' => fake()->numberBetween(0, 10),
-            //         'user_id' => $user->id
-            // ],[
-            //     'rarity_id' => PetRarity::all()->random()->id,
-            //         'image_id' => PetImage::all()->random()->id,
-            //         'name_id' => PetName::all()->random()->id,
-            //         'experience' => fake()->numberBetween(0, 10000),
-            //         'strength' => fake()->numberBetween(1, 1000),
-            //         'hunger_index' => fake()->numberBetween(0, 10),
-            //         'user_id' => $user->id
-            // ],[
-            //     'rarity_id' => PetRarity::all()->random()->id,
-            //         'image_id' => PetImage::all()->random()->id,
-            //         'name_id' => PetName::all()->random()->id,
-            //         'experience' => fake()->numberBetween(0, 10000),
-            //         'strength' => fake()->numberBetween(1, 1000),
-            //         'hunger_index' => fake()->numberBetween(0, 10),
-            //         'user_id' => $user->id
-            // ],[
-            //     'rarity_id' => PetRarity::all()->random()->id,
-            //         'image_id' => PetImage::all()->random()->id,
-            //         'name_id' => PetName::all()->random()->id,
-            //         'experience' => fake()->numberBetween(0, 10000),
-            //         'strength' => fake()->numberBetween(1, 1000),
-            //         'hunger_index' => fake()->numberBetween(0, 10),
-            //         'user_id' => $user->id
-            // ],[
-            //     'rarity_id' => PetRarity::all()->random()->id,
-            //         'image_id' => PetImage::all()->random()->id,
-            //         'name_id' => PetName::all()->random()->id,
-            //         'experience' => fake()->numberBetween(0, 10000),
-            //         'strength' => fake()->numberBetween(1, 1000),
-            //         'hunger_index' => fake()->numberBetween(0, 10),
-            //         'user_id' => $user->id
-            // ])->create();
+          
             $this->reply('Питомцы успешно добавлены!');
         } catch (\Throwable $th) {
             Log::info($th);
             $this->reply('Не удалось получить бесплатных питомцев!');
         }
 
-    }
-
+    }   
     protected function handleUnknownCommand(Stringable $text): void
     {
         $this->reply("Неизвестная комманда!");
