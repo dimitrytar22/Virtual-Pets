@@ -39,12 +39,12 @@ class MainHook extends WebhookHandler
             $chatId = $this->message->chat()->id();
         }
         
-        $this->chat->message("👋 Привет!" . "\nТвой *ID:* " . "`" . $chatId . "`" . "\n\n📋 Меню")->keyboard(
+        $this->chat->message("👋 Привет!" . "\n\n⚔️ Развивай питомцев, сражайся с другими и испытай удачу в колесе фортуны!\n\n📋 Меню")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('🐾 Мои питомцы')->action('myPets'),
                 Button::make('🆓 Получить бесплатных питомцев')->action('freePets'),
                 Button::make('🏪 Магазин')->action('shop'),
-                Button::make('🎰 Колесо фортуны')->action('fortuneWheel'),
+                Button::make('🎰 Колесо фортуны')->action('fortuneWheelMenu'),
                 ])
                 )->send();
         $this->chat->deleteMessage($this->messageId)->send();
@@ -186,13 +186,29 @@ class MainHook extends WebhookHandler
         }
 
     }   
+    public function fortuneWheelMenu(){
+        $buttonsArray = [];
+        $buttonsArray[] = Button::make('🎰 Крутить (1 🎟️)')->action('fortuneWheelSpin')->param('id', $this->callbackQuery->from()->id());
+        $buttonsArray[] = Button::make('📜 Правила')->action('fortuneWheelRules');
+        $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
+
+
+        $this->chat->message('🍀 Испытай свою удачу!
+Крути колесо и получай случайные призы.
+Каждый оборот - шанс на уникальную награду!')->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+    $this->chat->deleteMessage($this->messageId)->send();   
+
+        $this->reply('');
+    }
     protected function handleUnknownCommand(Stringable $text): void
     {
         $this->reply("Неизвестная комманда!");
     }
     protected function handleChatMessage(Stringable $text): void
     {
-        $this->reply("Я принял твоё сообщение");
+        $this->chat->deleteMessage($this->messageId)->send();   
+
+        $this->reply("");
 
     }
 }
