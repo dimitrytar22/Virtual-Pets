@@ -32,22 +32,31 @@ class MainHook extends WebhookHandler
 
     public function menu()
     {
-        
         if ($this->message == null) {
             $chatId = $this->callbackQuery->from()->id();
         } else {
             $chatId = $this->message->chat()->id();
         }
         
-        $this->chat->message("👋 Привет!" . "\n\n⚔️ Развивай питомцев, сражайся с другими и испытай удачу в колесе фортуны!\n\n📋 Меню")->keyboard(
+        $this->chat->message("👋 Hello!" . "\n\n⚔️ Evolve pets, fight with others and try your luck in the wheel of fortune!\n\n📋 Menu")->keyboard(
             Keyboard::make()->buttons([
-                Button::make('🐾 Мои питомцы')->action('myPets'),
-                Button::make('🆓 Получить бесплатных питомцев')->action('freePets'),
-                Button::make('🏪 Магазин')->action('shop'),
-                Button::make('🎰 Колесо фортуны')->action('fortuneWheelMenu'),
+                Button::make('🐾 My pets')->action('myPets'),
+                Button::make('🆓 Get Free Pets')->action('freePets'),
+                Button::make('🏪 Shop')->action('shop'),
+                Button::make('🎒 Inventory')->action('inventory'),
+                Button::make('🎰 Wheel of Fortune')->action('fortuneWheelMenu'),
                 ])
                 )->send();
         $this->chat->deleteMessage($this->messageId)->send();
+    }
+
+    public function inventory(){
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+        $inventory = $user->inventory;
+
+        $this->chat->message()->send();
+        $this->reply('');
     }
 
     public function myPets()
@@ -59,12 +68,11 @@ class MainHook extends WebhookHandler
         
         $buttonsArray = [];
         foreach ($userPets as $userPet) {
-            $buttonsArray[] = Button::make('Питомец' . ' - ' . $userPet->name->title)->action('pet')->param('id', $userPet->id);
+            $buttonsArray[] = Button::make('Pet' . ' - ' . $userPet->name->title)->action('pet')->param('id', $userPet->id);
         }
-        Log::info($buttonsArray);
-        $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
+        $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
         
-        $this->chat->message('Твои питомцы')->photo('images/myPets.jpg')->keyboard(
+        $this->chat->message('Your pets')->photo('images/myPets.jpg')->keyboard(
             Keyboard::make()->buttons($buttonsArray)->chunk(2)
             )->send();
             
@@ -80,16 +88,16 @@ class MainHook extends WebhookHandler
             $pet = Pet::find($this->data->get('id'));
         }
         $buttonsArray = [];
-        $buttonsArray[] = Button::make('🍽️ Кормить')->action('feed')->param('id', $this->data->get('id'));
-        $buttonsArray[] = Button::make('🎯💪 Тренировать')->action('train')->param('id', $this->data->get('id'));
-        $buttonsArray[] = Button::make('🔙 Назад к питомцам')->action('myPets');
+        $buttonsArray[] = Button::make('🍽️ Feed')->action('feed')->param('id', $this->data->get('id'));
+        $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $this->data->get('id'));
+        $buttonsArray[] = Button::make('🔙 Back to Pets')->action('myPets');
         $this->chat->message("
-Питомец № $pet->id  🐾 \n
-Ценность: * {$pet->rarity->title} * \n
-Имя: * {$pet->name->title} * \n
-Опыт: * {$pet->experience} *\n
-Сила : *{$pet->strength}*\n
-Голод: * {$pet->hunger_index}/10*\n"
+Pet №: *$pet->id* 🐾 \n
+Rarity: * {$pet->rarity->title} * \n
+Name: * {$pet->name->title} * \n
+Experience: * {$pet->experience} *\n
+Strength : *{$pet->strength}*\n
+Hunger: * {$pet->hunger_index}/10*\n"
 
         )->photo("images/".$pet->image->title)->keyboard(
             Keyboard::make()->buttons($buttonsArray)
@@ -105,7 +113,7 @@ class MainHook extends WebhookHandler
             $expPointsForFood = 10;
 
             if ($pet->hunger_index >= 10) {
-                $this->reply("Питомец сыт!");
+                $this->reply("The pet is full!");
                 return;
             } else if ($pet->hunger_index == 9) {
                 $pet->experience += $expPointsForFood;
@@ -117,12 +125,12 @@ class MainHook extends WebhookHandler
 
             $pet->save();
             $pet->save();
-            $this->reply("Вы покормили " . $pet->name->title . " (+{$expPointsForFood} очков опыта)");
+            $this->reply("You fed " . $pet->name->title . " (+{$expPointsForFood} experience points)");
             
             $this->pet($pet->id);
 
         } catch (\Throwable $th) {
-            $this->reply('Ошибка!');
+            $this->reply('Error!');
         }
     }
 
@@ -140,7 +148,7 @@ class MainHook extends WebhookHandler
         $pet->strength +=$strengthPointsForTrain;
         $pet->experience += $expPointsForTrain;
         $pet->save();
-        $this->reply("Вы потренировали питомца (+ {$strengthPointsForTrain} силы)");
+        $this->reply("You have trained your pet (+ {$strengthPointsForTrain} strength)");
         $this->pet($pet->id);
         $this->chat->deleteMessage($this->messageId)->send();   
     }
@@ -179,7 +187,7 @@ class MainHook extends WebhookHandler
            }
 
           
-            $this->reply('Питомцы успешно добавлены!');
+            $this->reply('Pets added successfully!');
         } catch (\Throwable $th) {
             Log::info($th);
             $this->reply('Не удалось получить бесплатных питомцев!');
@@ -188,21 +196,21 @@ class MainHook extends WebhookHandler
     }   
     public function fortuneWheelMenu(){
         $buttonsArray = [];
-        $buttonsArray[] = Button::make('🎰 Крутить (1 🎟️)')->action('fortuneWheelSpin')->param('id', $this->callbackQuery->from()->id());
-        $buttonsArray[] = Button::make('📜 Правила')->action('fortuneWheelRules');
-        $buttonsArray[] = Button::make('🔙 Назад в меню')->action('menu');
+        $buttonsArray[] = Button::make('🎰 Spin (1 🎟️)')->action('fortuneWheelSpin')->param('id', $this->callbackQuery->from()->id());
+        $buttonsArray[] = Button::make('📜 Rules')->action('fortuneWheelRules');
+        $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
 
 
-        $this->chat->message('🍀 Испытай свою удачу!
-Крути колесо и получай случайные призы.
-Каждый оборот - шанс на уникальную награду!')->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+        $this->chat->message('🍀 Try your luck!
+Spin the wheel and get random prizes.
+Every spin is a chance for a unique reward!')->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
     $this->chat->deleteMessage($this->messageId)->send();   
 
         $this->reply('');
     }
     protected function handleUnknownCommand(Stringable $text): void
     {
-        $this->reply("Неизвестная комманда!");
+        $this->reply("Unknown command!");
     }
     protected function handleChatMessage(Stringable $text): void
     {

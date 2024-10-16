@@ -63,6 +63,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
         Route::post('/store', [PetController::class, 'store'])->name('store');
         Route::get('/{pet}/edit', [PetController::class, 'edit'])->name('edit');
         Route::put('/{pet}', [PetController::class, 'update'])->name('update');
+        Route::delete('/{pet}', [PetController::class, 'delete'])->name('delete');
 
         Route::group(['prefix' => 'images', 'as' => 'images.'], function(){
             Route::get('/', [PetImageController::class, 'index'])->name('index');

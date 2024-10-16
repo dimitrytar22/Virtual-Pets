@@ -244,3 +244,40 @@ table th {
 .submenu .nav-links li {
     margin: 0 15px;
 }
+
+.btn-danger {
+    background-color: red;
+    color: white;
+}
+
+.btn-primary {
+    background-color: blue; /* Или другой цвет */
+    color: white;
+}
+.btn-custom {
+    background-color: #db4d4d; /* Нежный серый цвет */
+    color: #333; /* Темно-серый текст */
+    border: none;
+    padding: 10px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: inline-block; /* Убедитесь, что кнопки в одной строке */
+    text-align: center; /* Центрирование текста */
+    margin: 5px; /* Отступ между кнопками */
+    width: 100px; /* Ширина кнопок */
+    transition: background-color 0.3s ease; /* Плавный переход при наведении */
+}
+
+.btn-custom:hover {
+    background-color: #fd7272; /* Цвет при наведении */
+}
+
+.btn-edit {
+    background-color: #6675e6; /* Нежный серый цвет */
+    text-decoration: none; /* Убрать подчеркивание */
+}
+.btn-edit:hover{
+    background-color: #8b99ff; /* Цвет при наведении */
+
+}

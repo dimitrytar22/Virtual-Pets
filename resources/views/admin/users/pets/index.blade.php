@@ -31,7 +31,7 @@
                 fetch(`/admin/users/pets/search?user_id=${userId}`)
                     .then(response => response.json())
                     .then(data => {
-                        let petsHtml = '<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Rarity</th><th>Strength</th><th>Experience</th><th>Action</th></tr></thead><tbody>';
+                        let petsHtml = '<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Rarity</th><th>Image</th><th>Strength</th><th>Experience</th><th>Action</th></tr></thead><tbody>';
         
                         data.pets.forEach(pet => {
                             petsHtml += `
@@ -40,10 +40,18 @@
                                     <td>${pet.name.title}</td>
                                     <td>${pet.name.category.title}</td>
                                     <td>${pet.rarity.title}</td>
+                                    <td><img width='100px' src='/images/${pet.image.title}'></td>
                                     <td>${pet.strength}</td>
                                     <td>${pet.experience}</td>
-                                    <td><a href='/admin/pets/${pet.id}/edit'>Edit</a></td>
-                                </tr>
+                                    <td>
+                                        <a href='/admin/pets/${pet.id}/edit' class='btn-custom btn-edit'>Edit</a>
+                                        <form action='/admin/pets/${pet.id}' method='POST' style='display:inline-block;'>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type='submit' class='btn-custom' onclick='return confirm("Are you sure you want to delete this pet?")'>Delete</button>
+                                        </form>
+                                    </td>
+                                    </tr>
                             `;
                         });
 

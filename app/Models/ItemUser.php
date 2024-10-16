@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ItemUser extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
+
+    
 }

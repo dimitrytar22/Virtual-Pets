@@ -46,4 +46,8 @@ class PetController extends Controller
     public function update(UpdateRequest $updateRequest, Pet $pet ){
         return redirect()->route( $this->service->update($updateRequest,$pet));
     }
+    public function delete(Pet $pet){
+        $this->service->delete($pet);
+        return redirect()->route('admin.users.pets.index');
+    }
 }

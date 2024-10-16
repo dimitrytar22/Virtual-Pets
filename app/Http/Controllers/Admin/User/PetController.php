@@ -15,7 +15,7 @@ class PetController extends Controller
 
     public function search(Request $request){
         $userId = $request->query('user_id');
-        $pets = Pet::query()->where('user_id', $userId)->with('name')->with('name.category')->with('rarity')->get();
+        $pets = Pet::query()->where('user_id', $userId)->with('name')->with('name.category')->with('rarity')->with('image')->get();
         
         // Возвращаем питомцев в формате JSON
         return response()->json(['pets' => $pets]);

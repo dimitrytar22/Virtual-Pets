@@ -50,5 +50,11 @@ class User extends Authenticatable
         return $this->hasMany(Pet::class);
     }
 
+    public function inventory()
+    {
+        $items = $this->hasMany(ItemUser::class);
+        return $items;
+    }
+
    
 }

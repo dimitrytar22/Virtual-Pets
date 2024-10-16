@@ -51,6 +51,10 @@ class PetService{
         ]);
        return $data['previous_page'];
     }
+
+    public function delete(Pet $pet){
+        $pet->delete();
+    }
 }
 
 
