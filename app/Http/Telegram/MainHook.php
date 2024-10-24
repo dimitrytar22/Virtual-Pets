@@ -2,6 +2,7 @@
 
 namespace App\Http\Telegram;
 
+use App\Models\ItemUser;
 use App\Models\Pet;
 use App\Models\PetImage;
 use App\Models\PetName;
@@ -37,7 +38,7 @@ class MainHook extends WebhookHandler
         } else {
             $chatId = $this->message->chat()->id();
         }
-        
+
         $this->chat->message("👋 Hello!" . "\n\n⚔️ Evolve pets, fight with others and try your luck in the wheel of fortune!\n\n📋 Menu")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('🐾 My pets')->action('myPets'),
@@ -55,27 +56,44 @@ class MainHook extends WebhookHandler
         $user = User::query()->where('chat_id', $chatId)->first();
         $inventory = $user->inventory;
 
-        $this->chat->message()->send();
+        $buttonsArray = [];
+        $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
+
+        $itemsText = "";
+        if($inventory->isEmpty()){
+            $itemsText = 'Inventory is empty';
+            $this->chat->message($itemsText)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+            $this->chat->deleteMessage($this->messageId)->send();
+            $this->reply('');
+            return;
+        }
+
+        foreach($inventory as $itemUser){
+            $itemsText .= "*{$itemUser->item->title}* *{$itemUser->amount}x*
+";
+        }
+        $this->chat->message($itemsText)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+        $this->chat->deleteMessage($this->messageId)->send();
         $this->reply('');
     }
 
     public function myPets()
     {
-        
+
         $chatId = $this->callbackQuery->from()->id();
         $user = User::query()->where('chat_id', $chatId)->first();
         $userPets = $user->pets()->paginate(100);
-        
+
         $buttonsArray = [];
         foreach ($userPets as $userPet) {
             $buttonsArray[] = Button::make('Pet' . ' - ' . $userPet->name->title)->action('pet')->param('id', $userPet->id);
         }
         $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
-        
+
         $this->chat->message('Your pets')->photo('images/myPets.jpg')->keyboard(
             Keyboard::make()->buttons($buttonsArray)->chunk(2)
             )->send();
-            
+
         $this->chat->deleteMessage($this->messageId)->send();
         $this->reply('');
     }
@@ -90,7 +108,7 @@ class MainHook extends WebhookHandler
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🍽️ Feed')->action('feed')->param('id', $this->data->get('id'));
         $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $this->data->get('id'));
-        $buttonsArray[] = Button::make('🔙 Back to Pets')->action('myPets');
+        $buttonsArray[] = Button::make('🔙 Back to pets')->action('myPets');
         $this->chat->message("
 Pet №: *$pet->id* 🐾 \n
 Rarity: * {$pet->rarity->title} * \n
@@ -126,13 +144,15 @@ Hunger: * {$pet->hunger_index}/10*\n"
             $pet->save();
             $pet->save();
             $this->reply("You fed " . $pet->name->title . " (+{$expPointsForFood} experience points)");
-            
+
             $this->pet($pet->id);
 
         } catch (\Throwable $th) {
             $this->reply('Error!');
         }
     }
+
+
 
     public function train($id = NULL)
     {
@@ -143,14 +163,14 @@ Hunger: * {$pet->hunger_index}/10*\n"
             $pet = Pet::find($id);
         }else{
             $pet = Pet::find($this->data->get('id'));
-        }        
+        }
 
         $pet->strength +=$strengthPointsForTrain;
         $pet->experience += $expPointsForTrain;
         $pet->save();
         $this->reply("You have trained your pet (+ {$strengthPointsForTrain} strength)");
         $this->pet($pet->id);
-        $this->chat->deleteMessage($this->messageId)->send();   
+        $this->chat->deleteMessage($this->messageId)->send();
     }
     public function freePets()
     {
@@ -160,7 +180,7 @@ Hunger: * {$pet->hunger_index}/10*\n"
         $user = User::query()->where('chat_id', $userId)->first();
 
         try {
-            
+
             $user_id = $user->id;
 
 
@@ -168,7 +188,7 @@ Hunger: * {$pet->hunger_index}/10*\n"
                 $rarity_id = PetRarity::all()->random()->id;
                 $name_id = PetName::all()->random();
                 $image_id = PetImage::where('category_id', $name_id->category->id)->get()->random()->id;
-                
+
                 $name_id = $name_id->id;
 
                 $experience = fake()->numberBetween(0, 10000);
@@ -186,26 +206,60 @@ Hunger: * {$pet->hunger_index}/10*\n"
                 ]);
            }
 
-          
+
             $this->reply('Pets added successfully!');
         } catch (\Throwable $th) {
             Log::info($th);
             $this->reply('Не удалось получить бесплатных питомцев!');
         }
 
-    }   
+    }
     public function fortuneWheelMenu(){
+
+        $user = User::query()->where('chat_id', $this->callbackQuery->from()->id())->first();
+        $tickets = $user->tickets->first();
+        if($tickets == null)
+            $tickets = 0;
+        else
+            $tickets = $tickets->amount;
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🎰 Spin (1 🎟️)')->action('fortuneWheelSpin')->param('id', $this->callbackQuery->from()->id());
         $buttonsArray[] = Button::make('📜 Rules')->action('fortuneWheelRules');
         $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
 
 
-        $this->chat->message('🍀 Try your luck!
+        $this->chat->message("🍀 Try your luck!
 Spin the wheel and get random prizes.
-Every spin is a chance for a unique reward!')->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
-    $this->chat->deleteMessage($this->messageId)->send();   
+Every spin is a chance for a unique reward!
 
+*{$tickets}x 🎟 available*")->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+    $this->chat->deleteMessage($this->messageId)->send();
+
+        $this->reply('');
+    }
+
+    public function  fortuneWheelSpin()
+    {
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+        $inventory = $user->inventory;
+        $itemTickets = 0;
+        $buttonsArray = [];
+        if(!$inventory->isEmpty()){
+            foreach($inventory as $itemUser){
+                if($itemUser->item->title == 'Lottery ticket' && $itemUser->amount > 0){
+                    $itemTickets = $itemUser;
+                }
+            }
+        }
+
+        if(gettype($itemTickets ) == 'integer' && $itemTickets <= 0) {
+            $this->reply("Not enough tickets");
+            return;
+        }
+        ItemUser::reduceItem($itemTickets, 1 );
+        $this->fortuneWheelMenu();
+        $this->chat->deleteMessage($this->messageId)->send();
         $this->reply('');
     }
     protected function handleUnknownCommand(Stringable $text): void
@@ -214,7 +268,7 @@ Every spin is a chance for a unique reward!')->keyboard(Keyboard::make()->button
     }
     protected function handleChatMessage(Stringable $text): void
     {
-        $this->chat->deleteMessage($this->messageId)->send();   
+        $this->chat->deleteMessage($this->messageId)->send();
 
         $this->reply("");
 

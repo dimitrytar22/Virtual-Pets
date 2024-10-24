@@ -24,15 +24,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('searchButton').addEventListener('click', function() {
-                
+
                 const userId = document.getElementById('userSelect').value;
-        
+
                 // Отправляем AJAX-запрос на сервер
                 fetch(`/admin/users/pets/search?user_id=${userId}`)
                     .then(response => response.json())
                     .then(data => {
                         let petsHtml = '<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Rarity</th><th>Image</th><th>Strength</th><th>Experience</th><th>Action</th></tr></thead><tbody>';
-        
+
                         data.pets.forEach(pet => {
                             petsHtml += `
                                 <tr>
@@ -56,7 +56,7 @@
                         });
 
                         petsHtml += '</tbody></table>';
-        
+
                         // Вставляем таблицу с питомцами на страницу
                         document.getElementById('petsTable').innerHTML = petsHtml;
                     })

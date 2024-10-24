@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use PHPUnit\Framework\Attributes\Ticket;
 
 class User extends Authenticatable
 {
@@ -52,9 +53,14 @@ class User extends Authenticatable
 
     public function inventory()
     {
-        $items = $this->hasMany(ItemUser::class);
-        return $items;
+        return $this->hasMany(ItemUser::class);
     }
 
-   
+    public function tickets(){
+        return $this->hasMany(ItemUser::class)->whereHas('item', function ($query) {
+            $query->where('title', 'Lottery ticket');
+        });
+    }
+
+
 }

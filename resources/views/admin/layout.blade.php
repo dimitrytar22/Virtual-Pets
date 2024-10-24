@@ -34,25 +34,25 @@
                         </div>
                     </div>
                     <!-- Скрытый селект -->
-                    <select id="language" name="language" style="display: none;">
-                        <option value="en">English</option>
-                        <option value="ru">Русский</option>
-                        <option value="uk">Українська</option>
-                    </select>
+{{--                    <select id="language" name="language" style="display: none;">--}}
+{{--                        <option value="en">English</option>--}}
+{{--                        <option value="uk">Українська</option>--}}
+{{--                    </select>--}}
                 </div>
             </div>
-            
+
         </nav>
     </header>
-    
-    
+
+
 
             @yield('content')
             <footer>
+
                 <p>&copy; {{date('Y')}} Virtual Pets</p>
             </footer>
         </div>
     <script src="{{asset('js/script.js')}}"></script>
-    
+
 </body>
 </html>
