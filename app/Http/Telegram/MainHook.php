@@ -286,7 +286,7 @@ Every spin is a chance for a unique reward!
         }
 
         $prize = $wheel[array_rand($wheel)];
-        
+
         $this->chat->edit($message_id)->message("🎉 Приз: $prize 🎉")->send();
 
 
