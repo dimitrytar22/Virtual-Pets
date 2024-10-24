@@ -213,12 +213,12 @@ table th {
     background-color: #45a049;
 }
 
-.new-pet, .new-user, .new-image {
+.new-pet, .new-user, .new-image, .new-item {
     margin-bottom: 20px;
     text-align: left; /* Выравнивание ссылки по правому краю */
 }
 
-.new-pet a, .new-user a, .new-image a {
+.new-pet a, .new-user a, .new-image a, .new-item a {
     display: inline-block;
     background-color: #4CAF50;
     color: #fff;

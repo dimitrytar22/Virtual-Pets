@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Pets - @yield('title')</title>
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
+    <link rel="icon" href="/logo.png" type="image/x-icon">
 </head>
 <body>
     <header>

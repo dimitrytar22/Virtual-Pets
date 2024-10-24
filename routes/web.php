@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\PetCategoryController;
 use App\Http\Controllers\Admin\PetController;
 use App\Http\Controllers\Admin\PetImageController;
 use App\Http\Controllers\Admin\PetRarityController;
+use App\Http\Controllers\Admin\User\InventoryController;
 use App\Http\Controllers\Admin\User\PetController as UserPetController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdminController;
@@ -105,6 +106,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
         Route::group(['prefix' => 'pets', 'as' => 'pets.'], function(){
             Route::get('/', [UserPetController::class, 'index'])->name('index');
             Route::get('/search', [UserPetController::class, 'search'])->name('search');
+        });
+
+        Route::group(['prefix' => 'inventories', 'as' => 'inventories.'], function(){
+            Route::get('/', [\App\Http\Controllers\Admin\User\InventoryController::class, 'index'])->name('index');
+            Route::get('/search', [\App\Http\Controllers\Admin\User\InventoryController::class, 'search'])->name('search');
+            Route::get('/{itemUser}/edit', [InventoryController::class, 'edit'])->name('edit');
+            Route::put('/{itemUser}', [InventoryController::class, 'update'])->name('update');
+            Route::get('/create', [InventoryController::class, 'create'])->name('create');
+            Route::post('/store', [InventoryController::class, 'store'])->name('store');
+
         });
 
         Route::get('/', [UserController::class, 'index'])->name('index');
