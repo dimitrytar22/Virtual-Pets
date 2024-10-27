@@ -238,7 +238,7 @@ Every spin is a chance for a unique reward!
         }
 
 
-        $rewards = FortunePrize::all();
+        $rewards = FortunePrize::with('item')->get();
 
 
 
@@ -256,8 +256,8 @@ Every spin is a chance for a unique reward!
         $message = $this->chat->message(getWheelFrame(0, $wheel))->send();
         $message_id = $message->telegraphMessageId();
 
-        for ($i = 0; $i < count($wheel) * 0.1; $i++) {
-            usleep(500000);
+        for ($i = 0; $i < count($wheel) * 1; $i++) {
+            usleep(300000);
             $this->chat->edit($message_id)->message(getWheelFrame($i % count($wheel),$wheel))->send();
         }
 
@@ -278,15 +278,19 @@ Every spin is a chance for a unique reward!
                     case "Free Random Pet":{
                         $this->reply("Free random pet");
                         Pet::createRandomPet($chatId);
-                        return;
+                        break;
                     }
                 }
+                break;
+            }
+            case $prize->related_item != null:{
+                ItemUser::addItem($user, $prize->item,$prize->amount);
             }
 
         }
 
 
-        $this->chat->edit($message_id)->message("🎉 You got $prize->title 🎉
+        $this->chat->edit($message_id)->message("🎉 You got $prize->title *$prize->amount**x* 🎉
 $prize->description")->send();
 
 
