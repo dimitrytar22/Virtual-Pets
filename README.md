@@ -24,11 +24,10 @@ Virtual Pets is a card game where users can collect and interact with virtual pe
     https://ngrok.com/
 4. Start ngrok:
    ```bash
-    ngrok http 8000 
+   ngrok http 8000 
 5. Set ngrok URL to .env APP_URL=
     ```
     example APP_URL=https://f828-92-253-236-33.ngrok-free.app/
-
 6. Unset and set webhook
     ```bash
    php artisan telegraph:unset-webhook

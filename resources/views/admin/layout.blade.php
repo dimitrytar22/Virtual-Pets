@@ -14,6 +14,7 @@
             <ul class="nav-links">
                 <li><a href="{{route('admin.pets.index')}}">Manage Pets</a></li>
                 <li><a href="{{route('admin.users.index')}}">Manage Users</a></li>
+                <li><a href="{{route('admin.fortune_wheel.index')}}">Manage Fortune Wheel</a></li>
             </ul>
             <div class="language-select">
                 <div class="select-container">

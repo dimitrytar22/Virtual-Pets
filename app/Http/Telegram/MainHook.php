@@ -2,6 +2,7 @@
 
 namespace App\Http\Telegram;
 
+use App\Models\FortunePrize;
 use App\Models\ItemUser;
 use App\Models\Pet;
 use App\Models\PetImage;
@@ -178,40 +179,15 @@ Hunger: * {$pet->hunger_index}/10*\n"
         $userId = $this->callbackQuery->from()->id();
         $freePetsAmount = 10;
 
-        $user = User::query()->where('chat_id', $userId)->first();
-
         try {
-
-            $user_id = $user->id;
-
-
-            for ($i = 0; $i < 5; $i++) {
-                $rarity_id = PetRarity::all()->random()->id;
-                $name_id = PetName::all()->random();
-                $image_id = PetImage::where('category_id', $name_id->category->id)->get()->random()->id;
-
-                $name_id = $name_id->id;
-
-                $experience = fake()->numberBetween(0, 10000);
-                $strength = fake()->numberBetween(1, 1000);
-                $hunger_index = fake()->numberBetween(0, 10);
-
-                Pet::create([
-                    'rarity_id' => $rarity_id,
-                    'image_id' => $image_id,
-                    'name_id' => $name_id,
-                    'experience' => $experience,
-                    'strength' => $strength,
-                    'hunger_index' => $hunger_index,
-                    'user_id' => $user->id
-                ]);
+            for($i = 0; $i < $freePetsAmount; $i++){
+                Pet::createRandomPet($userId);
             }
-
-
             $this->reply('Pets added successfully!');
-        } catch (\Throwable $th) {
-            Log::info($th);
-            $this->reply('Unable to get free pets!');
+        }catch (\Exception $exception){
+            $this->reply('Error adding pets!');
+        }finally{
+            return;
         }
 
     }
@@ -262,7 +238,7 @@ Every spin is a chance for a unique reward!
         }
 
 
-        $rewards = ['100 монет', 'Бесплатный питомец', '50 монет', 'Сундук с сокровищами', 'Попробуйте еще раз'];
+        $rewards = FortunePrize::all();
 
 
 
@@ -280,15 +256,38 @@ Every spin is a chance for a unique reward!
         $message = $this->chat->message(getWheelFrame(0, $wheel))->send();
         $message_id = $message->telegraphMessageId();
 
-        for ($i = 0; $i < count($wheel) * 2; $i++) {
+        for ($i = 0; $i < count($wheel) * 0.1; $i++) {
             usleep(500000);
             $this->chat->edit($message_id)->message(getWheelFrame($i % count($wheel),$wheel))->send();
         }
 
-        $prize = $wheel[array_rand($wheel)];
+        $prize = $rewards->first();
+        $randomChance = rand(1,100);
 
-        $this->chat->edit($message_id)->message("🎉 Приз: $prize 🎉")->send();
+        foreach ($rewards as $reward) {
+            $randomChance -= $reward->chance;
+            if($randomChance <= 0) {
+                $prize = $reward;
+                break;
+            }
+        }
 
+        switch ($prize) {
+            case $prize->related_item == null:{
+                switch ($prize->title) {
+                    case "Free Random Pet":{
+                        $this->reply("Free random pet");
+                        Pet::createRandomPet($chatId);
+                        return;
+                    }
+                }
+            }
+
+        }
+
+
+        $this->chat->edit($message_id)->message("🎉 You got $prize->title 🎉
+$prize->description")->send();
 
 
 

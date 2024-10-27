@@ -123,5 +123,19 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
 
     });
 
+
+    Route::group(['prefix' => 'fortune_wheel', 'as' => 'fortune_wheel.'], function(){
+
+        Route::group(['prefix' => 'prizes', 'as' => 'prizes.'], function(){
+            Route::get('/create', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'create'])->name('create');
+            Route::post('/store', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'store'])->name('store');
+        });
+
+
+
+        Route::get('/', [\App\Http\Controllers\Admin\FortuneWheelController::class, 'index'])->name('index');
+
+    });
+
     Route::get('/', [AdminController::class, 'index'])->name('index');
 });

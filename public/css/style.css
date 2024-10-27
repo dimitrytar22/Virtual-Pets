@@ -232,7 +232,9 @@ table th {
 .new-pet a:hover {
     background-color: #003d00;
 }
-
+label{
+    margin-top: 5px;
+}
 .submenu {
     background-color: #4CAF50; /* Светлый зелёный цвет для подменю */
     padding: 10px 0;
