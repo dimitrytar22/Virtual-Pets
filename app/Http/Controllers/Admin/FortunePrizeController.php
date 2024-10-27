@@ -19,6 +19,7 @@ class FortunePrizeController extends Controller
         $data = $request->validated();
         FortunePrize::create([
            'title' => $data['title'],
+            'related_item' => $data['related_item'],
             'description' => $data['description'],
             'amount' => $data['amount'],
             'chance' => $data['chance'],

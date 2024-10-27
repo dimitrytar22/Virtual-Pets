@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PetRarity extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['rarity_index'];
 }

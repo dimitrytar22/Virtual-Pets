@@ -81,6 +81,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
 
         Route::group(['prefix' => 'rarities', 'as' => 'rarities.'], function(){
             Route::get('/', [PetRarityController::class, 'index'])->name('index');
+            Route::put('/{rarity}', [PetRarityController::class, 'update'])->name('update');
             });
 
         Route::group(['prefix' => 'names', 'as' => 'names.'], function(){

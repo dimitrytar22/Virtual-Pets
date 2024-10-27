@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class ItemUser extends Model
 {
@@ -25,9 +26,11 @@ class ItemUser extends Model
         try {
             $itemUser = self::query()->where('item_id', $item->id)->where('user_id', $user->id)->get();
             if(!$itemUser->isEmpty()){
+                Log::info($itemUser);
                 $itemUser = $itemUser->first();
                 $itemUser->amount = $itemUser->amount + $amount;
                 $itemUser->save();
+                Log::info($itemUser);
                 return true;
             }
 
@@ -38,6 +41,7 @@ class ItemUser extends Model
             ]);
             return true;
         }catch (\Exception $exception){
+            Log::error($exception->getMessage());
             return false;
         }
     }

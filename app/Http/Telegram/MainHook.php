@@ -3,6 +3,7 @@
 namespace App\Http\Telegram;
 
 use App\Models\FortunePrize;
+use App\Models\Item;
 use App\Models\ItemUser;
 use App\Models\Pet;
 use App\Models\PetImage;
@@ -23,6 +24,19 @@ class MainHook extends WebhookHandler
     public function start()
     {
         $chatId = $this->message->chat()->id();
+        $user = User::query()->where('chat_id', $chatId)->get();
+        if ($user->isEmpty()) {
+            $user = User::create([
+                'chat_id' => $chatId,
+                'name' => $this->message->chat()->title(),
+            ]);
+            ItemUser::addItem($user, Item::query()->where('title', 'Lottery Ticket')->get()->first(),3);
+            ItemUser::addItem($user, Item::query()->where('title', 'Apple')->get()->first(),10);
+            Pet::createRandomPet($chatId);
+            Pet::createRandomPet($chatId);
+            Pet::createRandomPet($chatId);
+            $this->chat->message('You have got start bonus: Apples *10x* Lottery Ticket *3x* Random Pets *3x*');
+        }
         User::firstOrCreate([
             'chat_id' => $chatId,
         ], [
@@ -180,13 +194,13 @@ Hunger: * {$pet->hunger_index}/10*\n"
         $freePetsAmount = 10;
 
         try {
-            for($i = 0; $i < $freePetsAmount; $i++){
+            for ($i = 0; $i < $freePetsAmount; $i++) {
                 Pet::createRandomPet($userId);
             }
             $this->reply('Pets added successfully!');
-        }catch (\Exception $exception){
+        } catch (\Exception $exception) {
             $this->reply('Error adding pets!');
-        }finally{
+        } finally {
             return;
         }
 
@@ -241,7 +255,6 @@ Every spin is a chance for a unique reward!
         $rewards = FortunePrize::with('item')->get();
 
 
-
         $wheel = ['🔵', '🔴', '🟢', '🟡', '🟠', '⚪', '⚫'];
 
         function getWheelFrame($index, $wheel)
@@ -258,24 +271,26 @@ Every spin is a chance for a unique reward!
 
         for ($i = 0; $i < count($wheel) * 1; $i++) {
             usleep(300000);
-            $this->chat->edit($message_id)->message(getWheelFrame($i % count($wheel),$wheel))->send();
+            $this->chat->edit($message_id)->message(getWheelFrame($i % count($wheel), $wheel))->send();
         }
 
         $prize = $rewards->first();
-        $randomChance = rand(1,100);
+        $randomChance = rand(1, 100);
 
         foreach ($rewards as $reward) {
             $randomChance -= $reward->chance;
-            if($randomChance <= 0) {
+            if ($randomChance <= 0) {
                 $prize = $reward;
                 break;
             }
         }
 
         switch ($prize) {
-            case $prize->related_item == null:{
+            case $prize->related_item == null:
+            {
                 switch ($prize->title) {
-                    case "Free Random Pet":{
+                    case "Free Random Pet":
+                    {
                         $this->reply("Free random pet");
                         Pet::createRandomPet($chatId);
                         break;
@@ -283,8 +298,9 @@ Every spin is a chance for a unique reward!
                 }
                 break;
             }
-            case $prize->related_item != null:{
-                ItemUser::addItem($user, $prize->item,$prize->amount);
+            case $prize->related_item != null:
+            {
+                ItemUser::addItem($user, $prize->item, $prize->amount);
             }
 
         }
@@ -293,8 +309,7 @@ Every spin is a chance for a unique reward!
         $this->chat->edit($message_id)->message("🎉 You got $prize->title *$prize->amount**x* 🎉
 $prize->description")->send();
 
-
-
+        $itemTickets->refresh();
         ItemUser::reduceItem($itemTickets, 1);
         $this->fortuneWheelMenu();
         $this->chat->deleteMessage($this->messageId)->send();
@@ -303,7 +318,10 @@ $prize->description")->send();
 
     protected function handleUnknownCommand(Stringable $text): void
     {
-        $this->reply("Unknown command!");
+        if (strtolower($text) == '/getappurl') {
+            $this->reply(env('APP_URL'));
+        } else
+            $this->reply("Unknown command!");
     }
 
     protected function handleChatMessage(Stringable $text): void
