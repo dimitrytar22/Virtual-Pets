@@ -7,7 +7,7 @@
 @section('content')
     <x-pets-submenu></x-pets-submenu>
 
-    <main>  
+    <main>
 
         <section id="existing-categories">
             <h2>Virtual Pets - Existing Categories</h2>
@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                     @foreach ($categories as $category)
-                        <tr>
+                        <tr class="row">
 
                             <td>{{ $category->id }}</td>
                             <td>{{ $category->title }}</td>
@@ -33,4 +33,4 @@
             </table>
         </section>
     </main>
-@endsection         
+@endsection

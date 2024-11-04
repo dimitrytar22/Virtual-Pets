@@ -2,7 +2,7 @@
 
 
 @section('title')
-    Manage Fortune Wheel
+    Manage Fortune Wheel Prizes
 @endsection
 
 @section('content')

@@ -9,6 +9,8 @@ use App\Models\Pet;
 use App\Models\PetImage;
 use App\Models\PetName;
 use App\Models\PetRarity;
+use App\Models\RegistrationApplication;
+use App\Models\Role;
 use App\Models\User;
 use DefStudio\Telegraph\DTO\Chat;
 use DefStudio\Telegraph\DTO\Message;
@@ -30,8 +32,8 @@ class MainHook extends WebhookHandler
                 'chat_id' => $chatId,
                 'name' => $this->message->chat()->title(),
             ]);
-            ItemUser::addItem($user, Item::query()->where('title', 'Lottery Ticket')->get()->first(),3);
-            ItemUser::addItem($user, Item::query()->where('title', 'Apple')->get()->first(),10);
+            ItemUser::addItem($user, Item::query()->where('title', 'Lottery Ticket')->get()->first(), 3);
+            ItemUser::addItem($user, Item::query()->where('title', 'Apple')->get()->first(), 10);
             Pet::createRandomPet($chatId);
             Pet::createRandomPet($chatId);
             Pet::createRandomPet($chatId);
@@ -158,7 +160,7 @@ Hunger: * {$pet->hunger_index}/10*\n"
             }
 
             $pet->save();
-            $pet->save();
+
             $this->reply("You fed " . $pet->name->title . " (+{$expPointsForFood} experience points)");
 
             $this->pet($pet->id);
@@ -291,8 +293,8 @@ Every spin is a chance for a unique reward!
                 switch ($prize->title) {
                     case "Free Random Pet":
                     {
-                        $this->reply("Free random pet");
                         Pet::createRandomPet($chatId);
+                        $this->reply("Free random pet");
                         break;
                     }
                 }
@@ -318,14 +320,92 @@ $prize->description")->send();
 
     protected function handleUnknownCommand(Stringable $text): void
     {
-        if (strtolower($text) == '/getappurl') {
-            $this->reply(env('APP_URL'));
-        } else
-            $this->reply("Unknown command!");
+        $chatId = $this->message->chat()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+
+
+        switch (strtolower($text)) {
+            case '/admin_register':
+            {
+                if($user->password != null)
+                {
+                    $this->reply('You are already registered!');
+                    break;
+                }
+                if(!RegistrationApplication::query()->where('user_id', $user->id)->get()->isEmpty()){
+                    $user->status = null;
+                    $user->save();
+
+                    $this->reply('You have already claimed the application!');
+                    break;
+                }
+                $this->reply('Enter password:');
+                $user->status = 'entering_password';
+                $user->save();
+
+                break;
+            }
+            case '/admin':
+            {
+                if ($user->role->title != 'admin' && $user->password == null)
+                    $this->reply("You have no access!");
+                else {
+                    $buttonsArray = [];
+                    $buttonsArray[] = Button::make('Admin Panel')->action('getAdminPanel');
+                    $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
+                    $this->chat->message("Welcome, " . $user->chat_id . "\nYou are " . $user->role->title)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+                }
+                break;
+            }
+            default:
+            {
+                $this->reply("Unknown command!");
+                break;
+            }
+        }
+
+
+    }
+    public function  getAdminPanel()
+    {
+        $this->chat->message(env('APP_URL'))->send();
+        $this->reply('');
     }
 
     protected function handleChatMessage(Stringable $text): void
     {
+        $chatId = $this->message->chat()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+
+
+        if ($user->status === 'entering_password') {
+            if(strlen($text) < 8){
+                $this->reply("Password should be more than 8 characters!");
+                $this->chat->deleteMessage($this->messageId)->send();
+                return;
+            }
+            $password = md5($text);
+
+            $data = [
+                'user_id' => $user->id,
+                'role_id' => Role::query()->where('title', "admin")->first()->id,
+                'password' => $text,
+            ];
+
+
+
+            $user->status = null;
+            $user->save();
+
+            RegistrationApplication::create($data);
+            $this->reply('Your application is on the consideration. Wait for approving!');
+
+        } else {
+
+        }
+
+
+
         $this->chat->deleteMessage($this->messageId)->send();
 
         $this->reply("");

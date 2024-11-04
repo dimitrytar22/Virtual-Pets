@@ -24,7 +24,6 @@
         </select>
         <button id="searchButton">Search</button>
 
-        <!-- Здесь будет отображаться таблица с питомцами -->
         <div id="petsTable"></div>
     </div>
 
@@ -34,7 +33,6 @@
 
                 const userId = document.getElementById('userSelect').value;
 
-                // Отправляем AJAX-запрос на сервер
                 fetch(`/admin/users/inventories/search?user_id=${userId}`)
                     .then(response => response.json())
                     .then(data => {

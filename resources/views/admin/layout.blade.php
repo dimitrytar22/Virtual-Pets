@@ -54,6 +54,7 @@
                 <p>&copy; {{date('Y')}} Virtual Pets</p>
             </footer>
         </div>
+    @yield('scripts')
     <script src="{{asset('js/script.js')}}"></script>
 
 </body>

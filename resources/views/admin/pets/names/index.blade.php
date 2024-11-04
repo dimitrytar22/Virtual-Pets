@@ -23,7 +23,7 @@
                 </thead>
                 <tbody>
                     @foreach ($pet_names as $name)
-                        <tr>
+                        <tr class="row">
                             <td>{{ $name->id }}</td>
                             <td>{{ $name->title }}</td>
                             <td>{{ $name->category->title }}</td>

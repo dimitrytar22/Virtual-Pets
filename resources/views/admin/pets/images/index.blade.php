@@ -24,7 +24,7 @@
                 </thead>
                 <tbody>
                     @foreach ($pet_images as $image)
-                        <tr>
+                        <tr class="row">
                             <td>{{ $image->id }}</td>
                             <td>{{ $image->title }}</td>
                             <td>{{ $image->category->title }}</td>

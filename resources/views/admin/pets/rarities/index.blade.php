@@ -23,7 +23,7 @@
                 </thead>
                 <tbody>
                 @foreach ($rarities as $rarity)
-                    <tr>
+                    <tr class="row">
                         <td>{{ $rarity->id }}</td>
                         <td>{{ $rarity->title }}</td>
                         <td class="rarity-index">{{ $rarity->rarity_index }}</td>

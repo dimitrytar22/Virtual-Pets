@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\FortuneWheelController;
 use App\Http\Controllers\Admin\PetCategoryController;
 use App\Http\Controllers\Admin\PetController;
 use App\Http\Controllers\Admin\PetImageController;
 use App\Http\Controllers\Admin\PetRarityController;
 use App\Http\Controllers\Admin\User\InventoryController;
 use App\Http\Controllers\Admin\User\PetController as UserPetController;
+use App\Http\Controllers\Admin\User\RegistrationApplicationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MainController;
@@ -122,14 +124,23 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/create', [UserController::class, 'create'])->name('create');
 
+        Route::group(['prefix' => 'registration_applications', 'as' => 'registration_applications.'], function(){
+            Route::get('/', [RegistrationApplicationController::class, 'index'])->name('index');
+            Route::put('/{application}', [RegistrationApplicationController::class, 'update'])->name('update');
+            Route::delete('/{application}', [RegistrationApplicationController::class, 'destroy'])->name('destroy');
+        });
+
     });
 
 
     Route::group(['prefix' => 'fortune_wheel', 'as' => 'fortune_wheel.'], function(){
-
+        Route::get('/', [FortuneWheelController::class, 'index'])->name('index');
         Route::group(['prefix' => 'prizes', 'as' => 'prizes.'], function(){
             Route::get('/create', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'store'])->name('store');
+            Route::get('/{prize}/edit', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'edit'])->name('edit');
+            Route::put('/{prize}', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'update'])->name('update');
+            Route::delete('/{prize}', [\App\Http\Controllers\Admin\FortunePrizeController::class, 'destroy'])->name('delete');
         });
 
 

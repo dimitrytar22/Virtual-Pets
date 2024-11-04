@@ -276,7 +276,9 @@ label{
 .btn-custom:hover {
     background-color: #fd7272; /* Цвет при наведении */
 }
-
+.row:hover{
+    background-color: #a1b5e3;
+}
 .btn-edit {
     background-color: #6675e6; /* Нежный серый цвет */
     text-decoration: none; /* Убрать подчеркивание */
