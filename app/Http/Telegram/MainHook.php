@@ -124,8 +124,8 @@ class MainHook extends WebhookHandler
             $pet = Pet::find($this->data->get('id'));
         }
         $buttonsArray = [];
-        $buttonsArray[] = Button::make('🍽️ Feed')->action('feed')->param('id', $this->data->get('id'));
-        $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $this->data->get('id'));
+        $buttonsArray[] = Button::make('🍽️ Feed')->action('chooseFood')->param('id', $pet->id);
+        $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $pet->id);
         $buttonsArray[] = Button::make('🔙 Back to pets')->action('myPets');
         $this->chat->message("
 Pet №: *$pet->id* 🐾 \n
@@ -142,19 +142,49 @@ Hunger: * {$pet->hunger_index}/10*\n"
         $this->reply("");
     }
 
+
+    public function chooseFood()
+    {
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+        $foodItems = [];
+
+        foreach ($user->inventory as $item) {
+            if(strtolower($item->item->category->title) == 'food')
+                $foodItems[] = $item;
+        }
+
+        $buttonsArray = [];
+        foreach ($foodItems as $foodItem) {
+            $buttonsArray[] = Button::make($foodItem->item->title . " " . $foodItem->amount . "x")->action('feed')->param('itemId', $foodItem->id)->param('petId', $this->data->get('id'));
+        }
+
+        $text = "Choose food";
+        if($foodItems == null)
+            $text .= "\n*You have no food!*";
+        $buttonsArray[] = Button::make("🔙 Back to pet")->action('pet')->param('id', $this->data->get('id'));
+        $this->chat->message($text)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+        $this->chat->deleteMessage($this->messageId)->send();
+
+
+    }
     public function feed()
     {
-        $pet = Pet::find($this->data->get('id'));
+        $pet = Pet::find($this->data->get('petId'));
+
         try {
             $expPointsForFood = 10;
 
             if ($pet->hunger_index >= 10) {
                 $this->reply("The pet is full!");
+                
                 return;
-            } else if ($pet->hunger_index == 9) {
+            }else if ($pet->hunger_index == 9) {
+                ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
                 $pet->experience += $expPointsForFood;
                 $pet->hunger_index += 1;
             } else {
+                ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
                 $pet->experience += $expPointsForFood;
                 $pet->hunger_index += 2;
             }
@@ -163,11 +193,14 @@ Hunger: * {$pet->hunger_index}/10*\n"
 
             $this->reply("You fed " . $pet->name->title . " (+{$expPointsForFood} experience points)");
 
-            $this->pet($pet->id);
 
         } catch (\Throwable $th) {
-            $this->reply('Error!');
+            $this->reply('Not enough items!');
+        } finally {
+            $this->pet($this->data->get('petId'));
+            $this->chat->deleteMessage($this->messageId)->send();
         }
+
     }
 
 
