@@ -12,7 +12,7 @@
         <!-- Форма для выбора пользователя -->
         <select id="userSelect">
             @foreach ($users as $user)
-                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->chat_id }})</option>
             @endforeach
         </select>
         <button id="searchButton">Search</button>
@@ -33,7 +33,9 @@
                     .then(data => {
                         let petsHtml = '<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Rarity</th><th>Image</th><th>Strength</th><th>Experience</th><th>Action</th></tr></thead><tbody>';
 
+                            console.log(data)
                         data.pets.forEach(pet => {
+
                             petsHtml += `
                                 <tr>
                                     <td>${pet.id}</td>
@@ -54,7 +56,6 @@
                                     </tr>
                             `;
                         });
-
                         petsHtml += '</tbody></table>';
 
                         // Вставляем таблицу с питомцами на страницу

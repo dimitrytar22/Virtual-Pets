@@ -19,7 +19,7 @@
 
         <select id="userSelect">
             @foreach ($users as $user)
-                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->chat_id }})</option>
             @endforeach
         </select>
         <button id="searchButton">Search</button>
