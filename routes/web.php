@@ -28,40 +28,10 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/inv', function (){
-    dd(\App\Models\User::find(1)->inventory->first()->item);
-});
-//Route::get('/import', function(){
-//    $dir = "images_to_import";
-//    $files =  scandir($dir);
-//    $files = array_diff($files, array('.', '..'));
-//    // dd($files);
-//    foreach ($files as $file) {
-//        usleep(1000);
-//        $category_title = strtok($file,'_');
-//        $category_id = PetCategory::query()->where('title', $category_title)->first()->id;
-//        var_dump($category_id);
-//        $file_path = $dir.'/'.$file;
-//        $destination_path = "images/";
-//
-//        PetImage::create([
-//            'title' => $file,
-//            'category_id' => $category_id
-//        ]);
-//
-//        if (copy($file_path, $destination_path . basename($file_path))) {
-//            echo "Файл успешно скопирован.";
-//        } else {
-//            echo "Ошибка при копировании файла.";
-//        }
-//
-//        echo $file . "<br>";
-//    }
-//    return 1;
-//});
+
 Route::get('/', [MainController::class, 'index'])->name('main.index');
 
-Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], function(){
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::group(['prefix' => 'pets', 'as' => 'pets.'], function(){
         Route::get('/', [PetController::class, 'index'])->name('index');
@@ -150,4 +120,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
     });
 
     Route::get('/', [AdminController::class, 'index'])->name('index');
+});
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 });
