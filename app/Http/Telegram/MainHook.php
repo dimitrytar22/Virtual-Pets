@@ -126,6 +126,7 @@ class MainHook extends WebhookHandler
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🍽️ Feed')->action('chooseFood')->param('id', $pet->id);
         $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $pet->id);
+        $buttonsArray[] = Button::make('☠️ Put to sleep')->action('confirmPutToSleep')->param('id', $pet->id);
         $buttonsArray[] = Button::make('🔙 Back to pets')->action('myPets');
         $this->chat->message("
 Pet №: *$pet->id* 🐾 \n
@@ -142,7 +143,26 @@ Hunger: * {$pet->hunger_index}/10*\n"
         $this->reply("");
     }
 
+    public function confirmPutToSleep()
+    {
+        $buttonsArray = [];
+        $buttonsArray[] = Button::make('✅ Yes')->action('putToSleep')->param('id', $this->data->get('id'));
+        $buttonsArray[] = Button::make('❌ Cancel')->action('pet')->param('id', $this->data->get('id'));
 
+        $this->chat->message("Are you sure you want to put your pet to sleep?
+The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)->chunk(2))->send();
+        $this->chat->deleteMessage($this->messageId)->send();
+        $this->reply("");
+    }
+    public function putToSleep()
+    {
+        $pet = Pet::find($this->data->get('id'));
+        $pet->delete();
+
+
+        $this->myPets();
+        $this->chat->deleteMessage($this->messageId)->send();
+    }
     public function chooseFood()
     {
         $chatId = $this->callbackQuery->from()->id();
@@ -177,7 +197,7 @@ Hunger: * {$pet->hunger_index}/10*\n"
 
             if ($pet->hunger_index >= 10) {
                 $this->reply("The pet is full!");
-                
+
                 return;
             }else if ($pet->hunger_index == 9) {
                 ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
