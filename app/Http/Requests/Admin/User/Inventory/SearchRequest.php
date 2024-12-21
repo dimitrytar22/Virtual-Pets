@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Requests\Api\V1\Item;
+namespace App\Http\Requests\Admin\User\Inventory;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequest extends FormRequest
+class SearchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-
         return true;
     }
 
@@ -23,9 +22,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|min:3|max:128',
-            'category_id' => 'required'
+            'user_id' => 'required'
         ];
     }
-
 }

@@ -31,6 +31,10 @@ class PetImageService{
             'category_id' => $data['category_id']
         ]);
     }
+    public function destroy(PetImage $image)
+    {
+        $image->delete();
+    }
 }
 
 

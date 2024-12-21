@@ -49,9 +49,9 @@ class PetImageController extends Controller
         return redirect()->route('admin.pets.images.index');
     }
 
-    public function  destroy(PetImage $image)
+    public function destroy(PetImage $image)
     {
-        $image->delete();
+       $this->service->destroy($image);
         return redirect()->route('admin.pets.images.index');
     }
 

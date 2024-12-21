@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Pet\PetName\StoreRequest;
-use App\Http\Requests\Admin\Pet\PetName\UpdateRequest ;
+use App\Http\Requests\Admin\Pet\PetName\UpdateRequest;
 use App\Http\Services\PetNameService;
 use App\Models\PetCategory;
 use App\Models\PetName;
-use Illuminate\Http\Request;
 
 class PetNameController extends Controller
 {

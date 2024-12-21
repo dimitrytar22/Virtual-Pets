@@ -1,35 +1,31 @@
 <?php
 
-namespace App\Http\Controllers\Admin\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\User\RegistrationApplication\UpdateRequest;
+use App\Http\Services\UserRegistrationApplicationService;
 use App\Models\RegistrationApplication;
-use Illuminate\Http\Request;
 
-class RegistrationApplicationController extends Controller
+class UserRegistrationApplicationController extends Controller
 {
+
+    public function __construct(private UserRegistrationApplicationService $service)
+    {
+    }
+
     public function index(){
         return view('admin.users.registration_application.index', ['registration_applications'=>RegistrationApplication::all()]);
     }
 
 
-
-
     public function update(UpdateRequest $request, $id){
-        $registrationApplication = RegistrationApplication::find($id);
-        $data = $request->validated();
-        $user = $registrationApplication->user;
-        $user->password = md5($data['password']);
-        $user->role_id = $data['role_id'];
-        $user->save();
-        $registrationApplication->delete();
+        $this->service->update($request,$id);
         return redirect()->route('admin.users.registration_applications.index');
     }
 
     public function destroy($id){
-        $registrationApplication = RegistrationApplication::find($id);
-        $registrationApplication->delete();
+        $this->service->destroy($id);
         return redirect()->route('admin.users.registration_applications.index');
     }
 }
