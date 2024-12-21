@@ -22,7 +22,15 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|min:5|max:255',
+            'title' => 'required|max:255',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'title.required' => 'Title field is required',
+            'title.max'  => 'Max length 256 symbols'
         ];
     }
 }

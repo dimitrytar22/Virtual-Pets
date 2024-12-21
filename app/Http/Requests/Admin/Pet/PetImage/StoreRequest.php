@@ -23,6 +23,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'image' => 'required|image',
+            'category_id' => 'required'
         ];
     }
 }

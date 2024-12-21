@@ -6,14 +6,12 @@
 @endsection
 
 @section('content')
-    <x-fortune-wheel-submenu></x-fortune-wheel-submenu>
-
-
 
     <main>
 
         <section id="existing-prizes">
-            <h2>Virtual Pets - Existing Prizes</h2>
+            <h2>Virtual Pets - Existing Prize</h2>
+            <div class="new-pet"><a href="{{route('admin.fortune_wheel.prizes.create')}}">Create Prizes</a></div>
             <table>
                 <thead>
                 <tr>

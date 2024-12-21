@@ -1,16 +1,11 @@
 <?php
-
 use App\Models\PetImage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
 
@@ -24,17 +19,13 @@ return new class extends Migration
             $table->integer('strength')->default(1);
             $table->integer('hunger_index')->default(10); // by default full stomach
             $table->timestamps();
-            
+
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('rarity_id')->references('id')->on('pet_rarities');
             $table->foreign('name_id')->references('id')->on('pet_names');
-            $table->foreign('image_id')->references('id')->on('pet_images'); 
+            $table->foreign('image_id')->references('id')->on('pet_images');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pets');

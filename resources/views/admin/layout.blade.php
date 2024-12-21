@@ -6,65 +6,41 @@
     <title>Virtual Pets - @yield('title')</title>
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
     <link rel="icon" href="/logo.png" type="image/x-icon">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 <body>
-    <header>
-        <h1>Virtual Pets Admin Panel</h1>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="{{route('admin.pets.index')}}">Manage Pets</a></li>
-                <li><a href="{{route('admin.users.index')}}">Manage Users</a></li>
-                <li><a href="{{route('admin.fortune_wheel.index')}}">Manage Fortune Wheel</a></li>
+<header>
+    <h1>Virtual Pets Admin Panel</h1>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="{{route('admin.pets.index')}}">Manage Pets</a></li>
+            <li><a href="{{route('admin.users.index')}}">Manage Users</a></li>
+            <li><a href="{{route('admin.fortune_wheel.index')}}">Manage Fortune Wheel</a></li>
 
-            </ul>
+        </ul>
 
-            <div class="language-select">
-                <div class="select-container">
-                    <!-- Выбранный элемент -->
-                    <div class="select-selected">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/20px-Flag_of_the_United_States.svg.png" alt="English Flag" class="flag-img">
-                        <span>Select Language</span>
-                    </div>
-                    <!-- Список опций -->
-                    <div class="select-items select-hide">
-                        <div class="select-item" data-value="en" data-img="https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/20px-Flag_of_the_United_States.svg.png">
-                            English
-                        </div>
+        <div class="logout-link">
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                Logout
+            </a>
 
-                        <div class="select-item" data-value="uk" data-img="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/20px-Flag_of_Ukraine.svg.png">
-                            Українська
-                        </div>
-                    </div>
-                    <!-- Скрытый селект -->
-{{--                    <select id="language" name="language" style="display: none;">--}}
-{{--                        <option value="en">English</option>--}}
-{{--                        <option value="uk">Українська</option>--}}
-{{--                    </select>--}}
-                </div>
-            </div>
-            <div class="logout-link">
-                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    Logout
-                </a>
-
-            </div>
-
-        </nav>
-    </header>
-
-
-
-            @yield('content')
-            <footer>
-
-                <p>&copy; {{date('Y')}} Virtual Pets</p>
-            </footer>
         </div>
-    @yield('scripts')
-    <script src="{{asset('js/script.js')}}"></script>
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
+
+    </nav>
+</header>
+@yield('content')
+<footer>
+
+    <p>&copy; {{date('Y')}} Virtual Pets</p>
+</footer>
+
+@yield('scripts')
+<script src="{{asset('js/script.js')}}"></script>
+<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>
 
 </body>
 </html>

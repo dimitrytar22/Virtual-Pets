@@ -47,7 +47,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
             Route::post('/store', [PetImageController::class, 'store'])->name('store');
             Route::get('/{image}/edit', [PetImageController::class, 'edit'])->name('edit');
             Route::put('/{image}', [PetImageController::class, 'update'])->name('update');
-
+            Route::delete('/{image}', [PetImageController::class, 'destroy'])->name('destroy');
         });
 
 
@@ -88,6 +88,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
             Route::put('/{itemUser}', [InventoryController::class, 'update'])->name('update');
             Route::get('/create', [InventoryController::class, 'create'])->name('create');
             Route::post('/store', [InventoryController::class, 'store'])->name('store');
+            Route::delete('/{itemUser}', [InventoryController::class, 'destroy'])->name('destroy');
 
         });
 
@@ -128,6 +129,6 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return redirect()->route('admin.index');
     })->name('dashboard');
 });

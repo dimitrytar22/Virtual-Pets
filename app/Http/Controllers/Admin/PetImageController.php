@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Pet\PetImage\StoreRequest;
+use App\Http\Requests\Admin\Pet\PetImage\UpdateRequest;
 use App\Http\Services\PetImageService;
 use App\Models\PetCategory;
 use App\Models\PetImage;
 use App\Models\PetImageCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PetImageController extends Controller
 {
@@ -19,22 +21,38 @@ class PetImageController extends Controller
         $this->service = $service;
     }
 
-    public function index(){
-        return view('admin.pets.images.index', ['pet_images' => PetImage::all()]);
-    }
-    public function create(){
-        return view('admin.pets.images.create', ['pet_categories' => PetCategory::all()]);
+    public function index()
+    {
+        return view('admin.pets.images.index', ['pet_images' => PetImage::paginate(20)]);
     }
 
-    public function store(StoreRequest $request){
+    public function create()
+    {
+        return view('admin.pets.images.create', ['categories' => PetCategory::all()]);
+    }
+
+    public function store(StoreRequest $request)
+    {
         $this->service->store($request);
-        return redirect()->route('admin.pets.images.create');
+        return redirect()->route('admin.pets.images.index');
     }
 
-    public function edit(PetImage $image){
-        dd($image);
+    public function edit(PetImage $image)
+    {
+        $categories = PetCategory::all()->sortBy('title');
+        return view('admin.pets.images.edit', compact('image', 'categories'));
     }
-    public function update(PetImage $image){
-        dd($image);
+
+    public function update(UpdateRequest $request, PetImage $image)
+    {
+        $this->service->update($request, $image);
+        return redirect()->route('admin.pets.images.index');
     }
+
+    public function  destroy(PetImage $image)
+    {
+        $image->delete();
+        return redirect()->route('admin.pets.images.index');
+    }
+
 }

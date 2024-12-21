@@ -39,7 +39,7 @@
             <label for="user_id">Pet User:</label>
             <select id="petUser" name="user_id" required>
                 @foreach ($users as $user)
-                    <option value="{{ $user->id }}" {{ $pet->chat_id == $user->chat_id ? 'selected' : '' }}>
+                    <option value="{{ $user->id }}" {{ $pet->user->chat_id == $user->chat_id ? 'selected' : '' }}>
                         {{ $user->name }} - {{ $user->chat_id }}
                     </option>
                 @endforeach

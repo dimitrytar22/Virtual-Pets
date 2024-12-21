@@ -2,9 +2,12 @@
 
 namespace App\Http\Telegram;
 
+use App\Models\BattleMove;
+use App\Models\BattleSession;
 use App\Models\FortunePrize;
 use App\Models\Item;
 use App\Models\ItemUser;
+use App\Models\OnlineUser;
 use App\Models\Pet;
 use App\Models\PetImage;
 use App\Models\PetName;
@@ -12,8 +15,10 @@ use App\Models\PetRarity;
 use App\Models\RegistrationApplication;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserStatus;
 use DefStudio\Telegraph\DTO\Chat;
 use DefStudio\Telegraph\DTO\Message;
+use DefStudio\Telegraph\Facades\Telegraph;
 use DefStudio\Telegraph\Handlers\WebhookHandler;
 use DefStudio\Telegraph\Keyboard\Button;
 use DefStudio\Telegraph\Keyboard\Keyboard;
@@ -25,6 +30,7 @@ class MainHook extends WebhookHandler
 {
     public function start()
     {
+
         $chatId = $this->message->chat()->id();
         $user = User::query()->where('chat_id', $chatId)->get();
         if ($user->isEmpty()) {
@@ -56,16 +62,229 @@ class MainHook extends WebhookHandler
             $chatId = $this->message->chat()->id();
         }
 
+
+        $user = User::query()->where('chat_id', $chatId)->first();
+
+
+        $onlineStatus = UserStatus::query()->where('title', 'online')->first();
+        $userMain = OnlineUser::firstOrCreate([
+            'user_id' => $user->id,
+
+        ], [
+            'user_id' => $user->id,
+            'status_id' => $onlineStatus->id,
+        ]);
+        $userMain->status_id = $onlineStatus->id;
+        $userMain->save();
+
         $this->chat->message("👋 Hello!" . "\n\n⚔️ Evolve pets, fight with others and try your luck in the wheel of fortune!\n\n📋 Menu")->keyboard(
             Keyboard::make()->buttons([
                 Button::make('🐾 My pets')->action('myPets'),
-                Button::make('🆓 Get Free Pets')->action('freePets'),
-                Button::make('🏪 Shop')->action('shop'),
+                Button::make('⚔️ Battle')->action('chooseBattle'),
+
                 Button::make('🎒 Inventory')->action('inventory'),
                 Button::make('🎰 Wheel of Fortune')->action('fortuneWheelMenu'),
             ])
         )->send();
         $this->chat->deleteMessage($this->messageId)->send();
+    }
+
+
+    public function chooseBattle()
+    {
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+
+        $this->chat->message("Choose battle")->keyboard(
+            Keyboard::make()->buttons([
+                Button::make('⚔️ Online PvP')->action('battleOnline'),
+                Button::make('🔙 Back to menu')->action('menu'),
+            ])
+        )->send();
+
+        $this->chat->deleteMessage($this->messageId)->send();
+        return;
+    }
+
+    public function battleBots()
+    {
+
+    }
+
+    public function battleOnline()
+    {
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+        $userMain = OnlineUser::firstOrCreate([
+            'user_id' => $user->id,
+        ], [
+            'user_id' => $user->id,
+            'status_id' => 3,
+        ]);
+        $searchStatus = UserStatus::query()->where('title', 'in search')->first();
+        $userMain->status_id = $searchStatus->id;
+        $userMain->save();
+        $availableUsersCollection = OnlineUser::query()->where('status_id', $searchStatus->id)->get();
+        if ($availableUsersCollection->count() <= 1) {
+            $this->reply("There are no users online! Play with bots!");
+            return;
+        }
+        $availableUsers = array();
+        foreach ($availableUsersCollection as $availableUser) {
+            $availableUsers[] = $availableUser->user->id;
+        }
+        if (in_array($user->id, $availableUsers))
+            unset($availableUsers[array_search($user->id, $availableUsers)]);
+        $randomUser = $availableUsers[array_rand($availableUsers)];
+        $selectedUser = OnlineUser::query()->where('user_id', $randomUser)->first();
+        $battleSession = BattleSession::create([
+            'user_one_id' => $userMain->user->id,
+            'user_two_id' => $selectedUser->user->id,
+            'status' => 'started',
+        ]);
+        $userMain->save();
+        $selectedUser->save();
+        $randomPetUserOne = Pet::query()->where('user_id', $userMain->user->id)->get();
+        $randomPetUserOne = $randomPetUserOne->random();
+        $randomPetUserTwo = Pet::query()->where('user_id', $selectedUser->user->id)->get();
+        $randomPetUserTwo = $randomPetUserTwo->random();
+        $chatIdUserOne = $userMain->user->chat_id;
+        $chatIdUserTwo = $selectedUser->user->chat_id;
+        $chatOne = TelegraphChat::query()->where('chat_id', $chatIdUserOne)->first();
+        $chatTwo = TelegraphChat::query()->where('chat_id', $chatIdUserTwo)->first();
+        $chatOne->message("Battle Started!\n\nPet №: *$randomPetUserOne->id* 🐾
+Rarity: * {$randomPetUserOne->rarity->title} *
+Name: * {$randomPetUserOne->name->title} *
+Experience: * {$randomPetUserOne->experience} *
+Strength : *{$randomPetUserOne->strength}*
+*You*
+---------------------------
+Pet №: *$randomPetUserTwo->id* 🐾
+Rarity: * {$randomPetUserTwo->rarity->title} *
+Name: * {$randomPetUserTwo->name->title} *
+Experience: * {$randomPetUserTwo->experience} *
+Strength : *{$randomPetUserTwo->strength}*
+Opponent\n")
+            ->keyboard(Keyboard::make()->buttons([Button::make("Roll dice 🎲")->action('moveRollDice')->param('petId', $randomPetUserOne->id)->param('userId', $userMain->user->id)->param('sessionId', $battleSession->id)]))->send();
+        $chatTwo->message("Battle Started!\n\nPet №: *$randomPetUserTwo->id* 🐾
+Rarity: * {$randomPetUserTwo->rarity->title} *
+Name: * {$randomPetUserTwo->name->title} *
+Experience: * {$randomPetUserTwo->experience} *
+Strength : *{$randomPetUserTwo->strength}*
+*You*
+---------------------------
+Pet №: *$randomPetUserOne->id* 🐾
+Rarity: * {$randomPetUserOne->rarity->title} *
+Name: * {$randomPetUserOne->name->title} *
+Experience: * {$randomPetUserOne->experience} *
+Strength : *{$randomPetUserOne->strength}*
+Opponent\n")
+            ->keyboard(Keyboard::make()->buttons([Button::make("Roll dice 🎲")->action('moveRollDice')->param('petId', $randomPetUserTwo->id)->param('userId', $selectedUser->user->id)->param('sessionId', $battleSession->id)]))->send();
+        $this->reply("");
+        return;
+
+
+        $this->chat->message("battle session started" . $battleSession->id)->send();
+        $this->reply("");
+    }
+
+    public function moveRollDice()
+    {
+        $checkIfPassed = BattleMove::query()->where('session_id', $this->data->get('sessionId'))->where('user_id', $this->data->get('userId'))->get();
+
+        if ($checkIfPassed != null && !$checkIfPassed->isEmpty()) {
+            $this->reply("You've already made your move!");
+            return;
+        }
+
+        $chatId = $this->callbackQuery->from()->id();
+        $user = User::query()->where('chat_id', $chatId)->first();
+
+        sleep(2);
+        $pet = Pet::find($this->data->get('petId'));
+
+        $randomNumber = rand(1, 10);
+        $baseStrength = $pet->strength;
+        $rarityBonus = $pet->rarity->rarity_index / 10;
+        $experienceBonus = $pet->experience / 5;
+
+        $damage = ($randomNumber + $baseStrength) * (1 + $rarityBonus) + $experienceBonus;
+        $damage = round($damage);
+
+
+        BattleMove::create([
+            'session_id' => $this->data->get('sessionId'),
+            'user_id' => $this->data->get('userId'),
+            'move_data' => $damage
+        ]);
+        $result = $this->checkBattleResults($this->data->get('sessionId'));
+        if (!$result) {
+            $this->reply("Waiting for opponent`s turn");
+            return;
+        } else {
+            $winner = User::find($result['winnerId']);
+
+            $looser = User::find($result['looserId']);
+
+            $winnerChat = TelegraphChat::query()->where('chat_id', $winner->chat_id)->first();
+            $looserChat = TelegraphChat::query()->where('chat_id', $looser->chat_id)->first();
+
+
+            $winnerChat->message("You Won! 🎉
+You hit {$result['winnerDamage']} damage")->keyboard(Keyboard::make()->buttons([
+                Button::make('🔙 Back to menu')->action('menu'),
+            ]))->send();
+
+            $looserChat->message("You Lost 😔
+You hit {$result['looserDamage']} damage")->keyboard(Keyboard::make()->buttons([
+                Button::make('🔙 Back to menu')->action('menu'),
+            ]))->send();
+
+            date_default_timezone_set('Europe/Kiev');
+
+            $session = BattleSession::query()->where('id', $this->data->get('sessionId'))->first();
+
+            $session->save();
+
+            $this->reply("");
+        }
+
+    }
+
+    public function checkBattleResults($sessionId)
+    {
+        $moves = BattleMove::query()->where('session_id', $sessionId)->get();
+        if ($moves->count() < 2) {
+            return false;
+        }
+        $winnerId = -1;
+        $winnerDamage = -1;
+
+        $looserId = -1;
+        $looserDamage = -1;
+
+        $moveOne = $moves->first();
+        $moveTwo = $moves->last();
+
+        if ($moveOne->move_data > $moveTwo->move_data) {
+            $winnerId = $moveOne->user_id;
+            $winnerDamage = $moveOne->move_data;
+
+            $looserId = $moveTwo->user_id;
+            $looserDamage = $moveTwo->move_data;
+        } else {
+            $winnerId = $moveTwo->user_id;
+            $winnerDamage = $moveTwo->move_data;
+
+            $looserId = $moveOne->user_id;
+            $looserDamage = $moveOne->move_data;
+        }
+        return [
+            'winnerDamage' => $winnerDamage,
+            'winnerId' => $winnerId,
+            'looserId' => $looserId,
+            'looserDamage' => $looserDamage
+        ];
     }
 
     public function inventory()
@@ -90,7 +309,7 @@ class MainHook extends WebhookHandler
             $itemsText .= "*{$itemUser->item->title}* *{$itemUser->amount}x*
 ";
         }
-        $this->chat->message($itemsText)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
+        $this->chat->message("Inventory: \n\n" . $itemsText)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
         $this->chat->deleteMessage($this->messageId)->send();
         $this->reply('');
     }
@@ -108,7 +327,7 @@ class MainHook extends WebhookHandler
         }
         $buttonsArray[] = Button::make('🔙 Back to menu')->action('menu');
 
-        $this->chat->message('Your pets')->photo('images/myPets.jpg')->keyboard(
+        $this->chat->message("Your pets\nTotal: *" . count($buttonsArray) - 1 . "*")->photo('images/myPets.jpg')->keyboard(
             Keyboard::make()->buttons($buttonsArray)->chunk(2)
         )->send();
 
@@ -123,10 +342,11 @@ class MainHook extends WebhookHandler
         } else {
             $pet = Pet::find($this->data->get('id'));
         }
+
         $buttonsArray = [];
         $buttonsArray[] = Button::make('🍽️ Feed')->action('chooseFood')->param('id', $pet->id);
         $buttonsArray[] = Button::make('🎯 Train')->action('train')->param('id', $pet->id);
-        $buttonsArray[] = Button::make('☠️ Put to sleep')->action('confirmPutToSleep')->param('id', $pet->id);
+        $buttonsArray[] = Button::make('☠️ Put to sleep ☠️')->action('confirmPutToSleep')->param('id', $pet->id);
         $buttonsArray[] = Button::make('🔙 Back to pets')->action('myPets');
         $this->chat->message("
 Pet №: *$pet->id* 🐾 \n
@@ -140,7 +360,7 @@ Hunger: * {$pet->hunger_index}/10*\n"
             Keyboard::make()->buttons($buttonsArray)
         )->send();
         $this->chat->deleteMessage($this->messageId)->send();
-        $this->reply("");
+        $this->reply('');
     }
 
     public function confirmPutToSleep()
@@ -154,6 +374,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
         $this->chat->deleteMessage($this->messageId)->send();
         $this->reply("");
     }
+
     public function putToSleep()
     {
         $pet = Pet::find($this->data->get('id'));
@@ -163,6 +384,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
         $this->myPets();
         $this->chat->deleteMessage($this->messageId)->send();
     }
+
     public function chooseFood()
     {
         $chatId = $this->callbackQuery->from()->id();
@@ -170,7 +392,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
         $foodItems = [];
 
         foreach ($user->inventory as $item) {
-            if(strtolower($item->item->category->title) == 'food')
+            if (strtolower($item->item->category->title) == 'food')
                 $foodItems[] = $item;
         }
 
@@ -180,7 +402,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
         }
 
         $text = "Choose food";
-        if($foodItems == null)
+        if ($foodItems == null)
             $text .= "\n*You have no food!*";
         $buttonsArray[] = Button::make("🔙 Back to pet")->action('pet')->param('id', $this->data->get('id'));
         $this->chat->message($text)->keyboard(Keyboard::make()->buttons($buttonsArray))->send();
@@ -188,6 +410,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
 
 
     }
+
     public function feed()
     {
         $pet = Pet::find($this->data->get('petId'));
@@ -199,7 +422,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
                 $this->reply("The pet is full!");
 
                 return;
-            }else if ($pet->hunger_index == 9) {
+            } else if ($pet->hunger_index == 9) {
                 ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
                 $pet->experience += $expPointsForFood;
                 $pet->hunger_index += 1;
@@ -287,6 +510,24 @@ Every spin is a chance for a unique reward!
     }
 
 
+    public function fortuneWheelRules()
+    {
+        $text = "Rules of the 'Wheel of Fortune' 🎡✨
+
+Spin the wheel 🎰 — click the 'Spin' button and see what luck has in store for you!
+Prizes and surprises 🎁 — every spin brings something exciting: coins, food, or even rare cards!
+Follow the fun 🌟 — come back daily to try your luck and collect even more rewards!
+
+Good luck! 🍀🎉";
+
+        $this->chat->message($text)->keyboard(Keyboard::make()->buttons([Button::make("🔙 Back to wheel")->action('fortuneWheelMenu')]))->send();
+        $this->chat->deleteMessage($this->messageId)->send();
+
+        $this->reply('');
+
+
+    }
+
     public function fortuneWheelSpin()
     {
         $chatId = $this->callbackQuery->from()->id();
@@ -305,11 +546,7 @@ Every spin is a chance for a unique reward!
             $this->reply("Not enough tickets");
             return;
         }
-
-
         $rewards = FortunePrize::with('item')->get();
-
-
         $wheel = ['🔵', '🔴', '🟢', '🟡', '🟠', '⚪', '⚫'];
 
         function getWheelFrame($index, $wheel)
@@ -380,12 +617,11 @@ $prize->description")->send();
         switch (strtolower($text)) {
             case '/admin_register':
             {
-                if($user->password != null)
-                {
+                if ($user->password != null) {
                     $this->reply('You are already registered!');
                     break;
                 }
-                if(!RegistrationApplication::query()->where('user_id', $user->id)->get()->isEmpty()){
+                if (!RegistrationApplication::query()->where('user_id', $user->id)->get()->isEmpty()) {
                     $user->status = null;
                     $user->save();
 
@@ -419,7 +655,8 @@ $prize->description")->send();
 
 
     }
-    public function  getAdminPanel()
+
+    public function getAdminPanel()
     {
         $this->chat->message(env('APP_URL'))->send();
         $this->reply('');
@@ -432,7 +669,7 @@ $prize->description")->send();
 
 
         if ($user->status === 'entering_password') {
-            if(strlen($text) < 8){
+            if (strlen($text) < 8) {
                 $this->reply("Password should be more than 8 characters!");
                 $this->chat->deleteMessage($this->messageId)->send();
                 return;
@@ -446,7 +683,6 @@ $prize->description")->send();
             ];
 
 
-
             $user->status = null;
             $user->save();
 
@@ -457,11 +693,8 @@ $prize->description")->send();
 
         }
 
-
-
         $this->chat->deleteMessage($this->messageId)->send();
 
         $this->reply("");
-
     }
 }

@@ -52,7 +52,7 @@
                                         <td>${itemUser.amount}</td>
                                         <td>
                                             <a href='/admin/users/inventories/${itemUser.id}/edit' class='btn-custom btn-edit'>Edit</a>
-                                            <form action='/admin/pets/${itemUser.id}' method='POST' style='display:inline-block;'>
+                                            <form action='/admin/users/inventories/${itemUser.id}' method='POST' style='display:inline-block;'>
                                                 @csrf
                                 @method('DELETE')
                                 <button type='submit' class='btn-custom' onclick='return confirm("Are you sure you want to delete this pet?")'>Delete</button>

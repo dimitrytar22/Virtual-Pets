@@ -30,6 +30,7 @@
                 <label for="petLevel">Pet Experience:</label>
                 <input type="number" id="petLevel" name="experience" required>
 
+
                 <label for="rarity_id">Pet Rarity:</label>
                 <select type="text" id="petRarity" name="rarity_id" required>
                     @foreach ($pet_rarities as $pet_rarity)

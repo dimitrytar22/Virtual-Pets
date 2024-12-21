@@ -68,4 +68,10 @@ class Pet extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+
+    public function __toString()
+    {
+        return $this->name->title . ' ' . $this->rarity->title . ' ' . $this->strength . ' ';
+    }
 }

@@ -15,9 +15,11 @@
 
         <label for="title">Title:</label>
         <input type="text" list="title" name="title" value="{{ $category->title}}" required />
-       
 
-        <div class="success-message">{{ session()->get('message') }}</div>
+
+        @error('title')
+        <div class="text-red-600">{{$message}}</div>
+        @enderror
 
         <button type="submit">Save Category</button>
     </form>

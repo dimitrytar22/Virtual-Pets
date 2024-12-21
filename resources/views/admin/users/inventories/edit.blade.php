@@ -16,7 +16,7 @@
 
 
             <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" value="{{ $itemUser->id }}" required>
+            <input type="number" id="amount" name="amount" value="{{ $itemUser->amount }}" required>
 
 
 

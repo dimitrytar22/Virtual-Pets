@@ -25,10 +25,10 @@ class FortunePrizeController extends Controller
             'amount' => $data['amount'],
             'chance' => $data['chance'],
         ]);
-        return redirect()->route('admin.fortune_wheel.prizes.create');
+        return redirect()->route('admin.fortune_wheel.prizes.index');
     }
 
-    public function  edit(FortunePrize $prize)
+    public function edit(FortunePrize $prize)
     {
         return view('admin.fortune_wheel.prizes.edit', ['prize' => $prize, 'items' => Item::all()]);
     }
@@ -37,10 +37,9 @@ class FortunePrizeController extends Controller
         $prize->update($request->validated());
         return redirect()->route('admin.fortune_wheel.index');
     }
-    public function  destroy($prize)
+    public function destroy(FortunePrize $prize)
     {
-        $fortunePrize = FortunePrize::find(($prize));
-        $fortunePrize->delete();
+        $prize->delete();
         return redirect()->route('admin.fortune_wheel.index');
     }
 }

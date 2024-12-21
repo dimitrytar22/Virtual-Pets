@@ -20,7 +20,7 @@ class PetCategoryController extends Controller
     }
 
     public function index(){
-        return view('admin.pets.categories.index', ['categories' => PetCategory::all()]);
+        return view('admin.pets.categories.index', ['categories' => PetCategory::paginate(20)]);
     }
     public function create(){
         return view('admin.pets.categories.create');
@@ -34,6 +34,6 @@ class PetCategoryController extends Controller
     }
     public function update(UpdateRequest $request, PetCategory $category){
         $this->service->update($request,$category);
-        return redirect()->route('admin.pets.categories.edit', $category->id)->with('message', 'Success');
+        return redirect()->route('admin.pets.categories.index')->with('message', 'Success');
     }
 }

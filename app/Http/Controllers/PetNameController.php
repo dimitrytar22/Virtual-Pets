@@ -19,7 +19,7 @@ class PetNameController extends Controller
     }
 
     public function index(){
-        return view('admin.pets.names.index', ['pet_names' => PetName::all()]);
+        return view('admin.pets.names.index', ['pet_names' => PetName::paginate(20)]);
     }
 
     public function create(){

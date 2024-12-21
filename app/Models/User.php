@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable
 {
@@ -27,8 +28,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'chat_id'
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -82,4 +83,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+
 }

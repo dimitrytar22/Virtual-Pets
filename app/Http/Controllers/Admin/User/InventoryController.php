@@ -49,4 +49,10 @@ class InventoryController extends Controller
         ItemUser::addItem(  $user,$item, $data['amount']);
         return redirect()->route($data['previous_page']);
     }
+
+    public function  destroy(ItemUser $itemUser)
+    {
+        $itemUser->delete();
+        return redirect()->route('admin.users.inventories.index');
+    }
 }
