@@ -28,6 +28,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [MainController::class, 'index'])->name('main.index');
+    Route::get('/admin', function (){
+        return redirect()->route('main.index');
+    });
+
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
 
 
@@ -38,6 +42,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/{pet}/edit', [PetController::class, 'edit'])->name('edit');
             Route::put('/{pet}', [PetController::class, 'update'])->name('update');
             Route::delete('/{pet}', [PetController::class, 'delete'])->name('delete');
+
 
             Route::group(['prefix' => 'images', 'as' => 'images.'], function () {
                 Route::get('/', [PetImageController::class, 'index'])->name('index');

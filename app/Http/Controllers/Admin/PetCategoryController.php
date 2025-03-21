@@ -26,6 +26,7 @@ class PetCategoryController extends Controller
         return view('admin.pets.categories.create');
     }
     public function store(StoreRequest $request) : RedirectResponse{
+        $this->authorize('create', PetCategory::class);
         $this->service->store($request);
         return redirect()->route('admin.pets.categories.create');
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Telegram;
 
+use App\Http\Services\ItemUserService;
+use App\Http\Services\PetService;
 use App\Models\BattleMove;
 use App\Models\BattleSession;
 use App\Models\FortunePrize;
@@ -28,6 +30,11 @@ use Illuminate\Support\Stringable;
 
 class MainHook extends WebhookHandler
 {
+    public function __construct(private PetService $petService, private ItemUserService $itemUserService)
+    {
+        parent::__construct();
+    }
+
     public function start()
     {
 
@@ -38,11 +45,11 @@ class MainHook extends WebhookHandler
                 'chat_id' => $chatId,
                 'name' => $this->message->chat()->title(),
             ]);
-            ItemUser::addItem($user, Item::query()->where('title', 'Lottery Ticket')->get()->first(), 3);
-            ItemUser::addItem($user, Item::query()->where('title', 'Apple')->get()->first(), 10);
-            Pet::createRandomPet($chatId);
-            Pet::createRandomPet($chatId);
-            Pet::createRandomPet($chatId);
+            $this->itemUserService->addItem($user, Item::query()->where('title', 'Lottery Ticket')->get()->first(), 3);
+            $this->itemUserService->addItem($user, Item::query()->where('title', 'Apple')->get()->first(), 10);
+            $this->petService->createRandomPet($chatId);
+            $this->petService->createRandomPet($chatId);
+            $this->petService->createRandomPet($chatId);
             $this->chat->message('You have got start bonus: Apples *10x* Lottery Ticket *3x* Random Pets *3x*');
         }
         User::firstOrCreate([
@@ -423,11 +430,11 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
 
                 return;
             } else if ($pet->hunger_index == 9) {
-                ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
+                $this->itemUserService->reduceItem(ItemUser::find($this->data->get('itemId')), 1);
                 $pet->experience += $expPointsForFood;
                 $pet->hunger_index += 1;
             } else {
-                ItemUser::reduceItem(ItemUser::find($this->data->get('itemId')), 1);
+                $this->itemUserService->reduceItem(ItemUser::find($this->data->get('itemId')), 1);
                 $pet->experience += $expPointsForFood;
                 $pet->hunger_index += 2;
             }
@@ -473,7 +480,7 @@ The action cannot be undone")->keyboard(Keyboard::make()->buttons($buttonsArray)
 
         try {
             for ($i = 0; $i < $freePetsAmount; $i++) {
-                Pet::createRandomPet($userId);
+                $this->petService->createRandomPet($userId);
             }
             $this->reply('Pets added successfully!');
         } catch (\Exception $exception) {
@@ -583,7 +590,7 @@ Good luck! 🍀🎉";
                 switch ($prize->title) {
                     case "Free Random Pet":
                     {
-                        Pet::createRandomPet($chatId);
+                        $this->petService->createRandomPet($chatId);
                         $this->reply("Free random pet");
                         break;
                     }
@@ -592,7 +599,7 @@ Good luck! 🍀🎉";
             }
             case $prize->related_item != null:
             {
-                ItemUser::addItem($user, $prize->item, $prize->amount);
+                $this->itemUserService->addItem($user, $prize->item, $prize->amount);
             }
 
         }
@@ -602,7 +609,7 @@ Good luck! 🍀🎉";
 $prize->description")->send();
 
         $itemTickets->refresh();
-        ItemUser::reduceItem($itemTickets, 1);
+        $this->itemUserService->reduceItem($itemTickets, 1);
         $this->fortuneWheelMenu();
         $this->chat->deleteMessage($this->messageId)->send();
         $this->reply('');
